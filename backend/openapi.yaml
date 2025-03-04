@@ -1,0 +1,5579 @@
+openapi: 3.0.0
+info:
+  title: Cricket v2
+  contact:
+    name: Sportradar
+    url: ""
+    email: support@sportradar.com
+  version: 2.0.0
+  x-sr-package: cricket
+  x-sr-version: v2
+servers:
+- url: https://api.sportradar.com/cricket-t2
+  description: Trial Environment
+- url: https://api.sportradar.com/cricket-p2
+  description: Production Environment
+paths:
+  /{locale}/matches/{urn_sport_event}/lineups:
+    get:
+      description: |
+        Show lineups for one sport event.
+      operationId: getMatchLineups
+      parameters:
+      - $ref: '#/components/parameters/urn_sport_event'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/match_lineups'
+      security:
+      - ApiKeyAuth: []
+      summary: show lineups one sport event
+      tags:
+      - sport_events
+      x-sr-name: match_lineups
+  /{locale}/matches/{urn_sport_event}/summary:
+    get:
+      description: |
+        Show a summary for one sport event, including results.
+      operationId: getMatchesSummary
+      parameters:
+      - $ref: '#/components/parameters/urn_sport_event'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/match_summary'
+      security:
+      - ApiKeyAuth: []
+      summary: show summary for one sport event
+      tags:
+      - sport_events
+      x-sr-name: match_summary
+  /{locale}/matches/{urn_sport_event}/timeline:
+    get:
+      description: |
+        Show a timeline for one sport event, including results.
+      operationId: getMatchesTimeline
+      parameters:
+      - $ref: '#/components/parameters/urn_sport_event'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/match_timeline'
+      security:
+      - ApiKeyAuth: []
+      summary: show timeline for one sport event
+      tags:
+      - sport_events
+      - timeline
+      x-sr-name: match_timeline
+  /{locale}/matches/{urn_sport_event}/timeline/delta:
+    get:
+      description: |
+        Get the summary and timeline for a sport event where something happened in the last 5 minutes(300s)
+      operationId: getMatchTimelineDelta
+      parameters:
+      - $ref: '#/components/parameters/urn_sport_event'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/match_timeline_delta'
+      security:
+      - ApiKeyAuth: []
+      summary: show timeline delta for one sport event
+      tags:
+      - sport_events
+      - timeline
+      x-sr-name: match_timeline_delta
+  /{locale}/players/{urn_player}/profile:
+    get:
+      description: |
+        Get a player profile with statistics
+      operationId: getPlayerProfile
+      parameters:
+      - $ref: '#/components/parameters/urn_player'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/player_profile'
+      security:
+      - ApiKeyAuth: []
+      summary: player profile with statistics
+      tags:
+      - players
+      x-sr-name: player_profile
+  /{locale}/schedules/{date}/schedule:
+    get:
+      description: |
+        Get a list of all live sport events
+      operationId: getScheduleSchedules
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_date'
+      responses:
+        "200":
+          $ref: '#/components/responses/schedule_schedules'
+      security:
+      - ApiKeyAuth: []
+      summary: lists all scheduled sport event on a date
+      tags:
+      - schedule
+      x-sr-name: schedule_schedules
+  /{locale}/schedules/{urn_date}/results:
+    get:
+      description: |
+        Get a list of results for a date.
+      operationId: getScheduleResults
+      parameters:
+      - $ref: '#/components/parameters/urn_date'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/results'
+      security:
+      - ApiKeyAuth: []
+      summary: lists results for a date
+      tags:
+      - schedule
+      x-sr-name: results
+  /{locale}/schedules/live/schedule:
+    get:
+      description: |
+        Get a list of all live sport events
+      operationId: getScheduleLiveSchedules
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/schedule_live_schedules'
+      security:
+      - ApiKeyAuth: []
+      summary: lists all live scheduled sport events
+      tags:
+      - schedule
+      x-sr-name: schedule_live_schedules
+  /{locale}/teams/{urn_competitor}/profile:
+    get:
+      description: |
+        Get profile for a team
+      operationId: getTeamProfile
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_competitor'
+      responses:
+        "200":
+          $ref: '#/components/responses/team_profile'
+      security:
+      - ApiKeyAuth: []
+      summary: get a team profile
+      tags:
+      - teams
+      x-sr-name: team_profile
+  /{locale}/teams/{urn_competitor}/results:
+    get:
+      description: |
+        Get a list of results for a team.
+      operationId: getTeamResults
+      parameters:
+      - $ref: '#/components/parameters/urn_competitor'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/team_results'
+      security:
+      - ApiKeyAuth: []
+      summary: lists results for a team
+      tags:
+      - teams
+      x-sr-name: team_results
+  /{locale}/teams/{urn_competitor}/schedule:
+    get:
+      description: |
+        Get a list of scheduled sport events for a team.
+      operationId: getTeamSchedule
+      parameters:
+      - $ref: '#/components/parameters/urn_competitor'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/team_schedule'
+      security:
+      - ApiKeyAuth: []
+      summary: lists all scheduled sport events for a team
+      tags:
+      - teams
+      - schedule
+      x-sr-name: team_schedule
+  /{locale}/teams/{urn_competitor}/versus/{urn_competitor2}/matches:
+    get:
+      description: |
+        lists results and upcoming meetings between two teams.
+      operationId: getTeamVersusMatches
+      parameters:
+      - $ref: '#/components/parameters/urn_competitor'
+      - $ref: '#/components/parameters/urn_competitor2'
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/team_versus_matches'
+      security:
+      - ApiKeyAuth: []
+      summary: lists results and upcoming meetings between two teams
+      tags:
+      - teams
+      x-sr-name: team_versus_matches
+  /{locale}/tournaments:
+    get:
+      description: |
+        Get a list of all tournaments.
+      operationId: getTournaments
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournaments'
+      security:
+      - ApiKeyAuth: []
+      summary: lists all tournaments
+      tags:
+      - tournaments
+      x-sr-name: tournaments
+  /{locale}/tournaments/{urn_tournament}/info:
+    get:
+      description: |
+        info for a tournament
+      operationId: getTournamentInfo
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_tournament'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournament_info'
+      security:
+      - ApiKeyAuth: []
+      summary: info for a tournament
+      tags:
+      - tournaments
+      x-sr-name: tournament_info
+  /{locale}/tournaments/{urn_tournament}/leaders:
+    get:
+      description: |
+        leaders for a tournament
+      operationId: getTournamentLeaders
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_tournament'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournament_leaders'
+      security:
+      - ApiKeyAuth: []
+      summary: leaders for a tournament
+      tags:
+      - tournaments
+      x-sr-name: tournament_leaders
+  /{locale}/tournaments/{urn_tournament}/results:
+    get:
+      description: |
+        Get a list of results for a tournament.
+      operationId: getTournamentResults
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_tournament'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournament_results'
+      security:
+      - ApiKeyAuth: []
+      summary: lists results for a tournament
+      tags:
+      - tournaments
+      x-sr-name: tournament_results
+  /{locale}/tournaments/{urn_tournament}/schedule:
+    get:
+      description: |
+        Get a list of all scheduled sport events scheduled in a tournament.
+      operationId: getTournamentSchedule
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_tournament'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournament_schedule'
+      security:
+      - ApiKeyAuth: []
+      summary: lists all scheduled sport event in a  tournament
+      tags:
+      - tournaments
+      - schedule
+      x-sr-name: tournament_schedule
+  /{locale}/tournaments/{urn_tournament}/seasons:
+    get:
+      description: |
+        Get a list of all seasons in a tournament.
+      operationId: getTournamentSeasons
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_tournament'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournament_seasons'
+      security:
+      - ApiKeyAuth: []
+      summary: lists all seasons in a tournament
+      tags:
+      - tournaments
+      - seasons
+      x-sr-name: tournament_seasons
+  /{locale}/tournaments/{urn_tournament}/standings:
+    get:
+      description: |
+        Get standings for a tournament.
+      operationId: getTournamentStandings
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_tournament'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournament_standings'
+      security:
+      - ApiKeyAuth: []
+      summary: standings for a tournament
+      tags:
+      - tournaments
+      - standings
+      x-sr-name: tournament_standings
+  /{locale}/tournaments/{urn_tournament}/teams/{urn_competitor}/squads:
+    get:
+      description: |
+        Get squads for a team in a tournament.
+      operationId: getTournamentSquads
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/urn_tournament'
+      - $ref: '#/components/parameters/urn_competitor'
+      responses:
+        "200":
+          $ref: '#/components/responses/tournament_team_squads'
+      security:
+      - ApiKeyAuth: []
+      summary: squads for a team in a tournament.
+      tags:
+      - tournaments
+      - teams
+      x-sr-name: tournament_team_squads
+  /{locale}/tours:
+    get:
+      description: |
+        Get a list of all tours.
+      operationId: getTours
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      responses:
+        "200":
+          $ref: '#/components/responses/tours'
+      security:
+      - ApiKeyAuth: []
+      summary: lists all tours
+      tags:
+      - tours
+      x-sr-name: tours
+components:
+  schemas:
+    base_player:
+      additionalProperties: false
+      properties:
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        date_of_birth:
+          description: YYYY-MM-DD
+          format: date
+          type: string
+          xml:
+            attribute: true
+        gender:
+          $ref: '#/components/schemas/enum_gender'
+        height:
+          description: Height in cm
+          type: integer
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        jersey_number:
+          type: integer
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        nationality:
+          type: string
+          xml:
+            attribute: true
+        nickname:
+          type: string
+          xml:
+            attribute: true
+        type:
+          $ref: '#/components/schemas/enum_player_type'
+        weight:
+          description: Weight in kg
+          type: integer
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: player
+    batting:
+      properties:
+        highest_score:
+          items:
+            $ref: '#/components/schemas/runs'
+          type: array
+          xml:
+            name: highest_score
+            wrapped: true
+        top_average:
+          items:
+            $ref: '#/components/schemas/highest_average'
+          type: array
+          xml:
+            name: top_average
+            wrapped: true
+        top_fifties:
+          items:
+            $ref: '#/components/schemas/fifties'
+          type: array
+          xml:
+            name: top_fifties
+            wrapped: true
+        top_fours:
+          items:
+            $ref: '#/components/schemas/fours'
+          type: array
+          xml:
+            name: top_fours
+            wrapped: true
+        top_hundreds:
+          items:
+            $ref: '#/components/schemas/hundreds'
+          type: array
+          xml:
+            name: top_hundreds
+            wrapped: true
+        top_runs:
+          items:
+            $ref: '#/components/schemas/runs'
+          type: array
+          xml:
+            name: top_runs
+            wrapped: true
+        top_sixes:
+          items:
+            $ref: '#/components/schemas/sixes'
+          type: array
+          xml:
+            name: top_sixes
+            wrapped: true
+        top_strike_rate:
+          items:
+            $ref: '#/components/schemas/strike_rate'
+          type: array
+          xml:
+            name: top_strike_rate
+            wrapped: true
+      type: object
+      xml:
+        name: batting
+        x-sr-object-name: Batting
+    batting_params:
+      properties:
+        angle_traversed:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+            name: AngleTraversedEnum
+        connect:
+          enum:
+          - good
+          - poor
+          - play_miss
+          - inside_edge
+          - outside_edge
+          - hit_gloves
+          type: string
+          xml:
+            attribute: true
+            name: ConnectEnum
+        crease_position:
+          enum:
+          - frontfoot
+          - backfoot
+          - charged_down_the_pitch
+          - others
+          type: string
+          xml:
+            attribute: true
+            name: CreasePositionEnum
+        distance_travelled:
+          type: string
+          xml:
+            attribute: true
+        hit_to_boundary:
+          type: boolean
+          xml:
+            attribute: true
+        non_striker:
+          $ref: '#/components/schemas/non_striker'
+        runs_scored:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        shot_type:
+          enum:
+          - defensive
+          - leave
+          - padded
+          - cut
+          - late_cut
+          - square_cut
+          - pull
+          - hook
+          - drive
+          - glance
+          - leg_glance
+          - ramp
+          - sweep
+          - reverse_sweep
+          - switch_hit
+          - paddle
+          - flick
+          - scoop
+          type: string
+          xml:
+            attribute: true
+            name: ShotTypeEnum
+        striker:
+          $ref: '#/components/schemas/striker'
+        stroke:
+          enum:
+          - hook
+          - pull_shot
+          - flick
+          - backfoot_punch
+          - weep
+          - leg_glance
+          - paddle_sweep
+          - reverse_sweep
+          - guided
+          - upper_cut
+          - square_cut
+          - square_drive
+          - punched
+          - pushed
+          - cover_drive
+          - off_drive
+          - straight_drive
+          - on_drive
+          - slog
+          - lofted_shot
+          - slog_sweep
+          - chinese_cut
+          - backfoot_defense
+          - forward_defense
+          - left_alone
+          - deliberate_padding
+          - ducked
+          - inside_out
+          - switch_hit
+          - scoop
+          - helicopter_shot
+          - normal
+          - inside_edge
+          - late_cut
+          type: string
+          xml:
+            attribute: true
+            name: StrokeEnum
+        trace:
+          enum:
+          - aerial
+          - grounded
+          - not_applicable
+          type: string
+          xml:
+            attribute: true
+            name: TraceEnum
+        zone_played_in:
+          enum:
+          - square_leg
+          - fine_leg
+          - third_man
+          - point
+          - cover
+          - mid_off
+          - mid_on
+          - mid_wicket
+          type: string
+          xml:
+            attribute: true
+            name: ZonePlayedInEnum
+      type: object
+      xml:
+        name: batting_params
+        x-sr-object-name: BattingParams
+    bowling:
+      properties:
+        top_bowling_average:
+          items:
+            $ref: '#/components/schemas/bowling_average'
+          type: array
+          xml:
+            name: top_bowling_average
+            wrapped: true
+        top_dot_balls:
+          items:
+            $ref: '#/components/schemas/dot_balls'
+          type: array
+          xml:
+            name: top_dot_balls
+            wrapped: true
+        top_economy:
+          items:
+            $ref: '#/components/schemas/economy'
+          type: array
+          xml:
+            name: top_economy
+            wrapped: true
+        top_maidens:
+          items:
+            $ref: '#/components/schemas/maidens'
+          type: array
+          xml:
+            name: top_maidens
+            wrapped: true
+        top_wickets:
+          items:
+            $ref: '#/components/schemas/wickets'
+          type: array
+          xml:
+            name: top_wickets
+            wrapped: true
+      type: object
+      xml:
+        name: bowling
+        x-sr-object-name: Bowling
+    bowling_average:
+      properties:
+        average:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+      required:
+      - rank
+      - player
+      - average
+      type: object
+      xml:
+        name: bowling_average
+    bowling_end:
+      properties:
+        name:
+          type: string
+          xml:
+            attribute: true
+      type: object
+      xml:
+        name: bowling_end
+        x-sr-object-name: BowlingEnd
+    bowling_params:
+      properties:
+        beat_bat:
+          type: boolean
+          xml:
+            attribute: true
+        bowler:
+          additionalProperties: false
+          properties:
+            country_code:
+              type: string
+              xml:
+                attribute: true
+            date_of_birth:
+              description: YYYY-MM-DD
+              format: date
+              type: string
+              xml:
+                attribute: true
+            gender:
+              $ref: '#/components/schemas/enum_gender'
+            height:
+              description: Height in cm
+              type: integer
+              xml:
+                attribute: true
+            id:
+              type: string
+              xml:
+                attribute: true
+            jersey_number:
+              type: integer
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+            nationality:
+              type: string
+              xml:
+                attribute: true
+            nickname:
+              type: string
+              xml:
+                attribute: true
+            type:
+              $ref: '#/components/schemas/enum_player_type'
+            weight:
+              description: Weight in kg
+              type: integer
+              xml:
+                attribute: true
+          required:
+          - id
+          - name
+          type: object
+          xml:
+            name: bowler
+        bowling_end:
+          type: string
+          xml:
+            attribute: true
+        bowling_from:
+          enum:
+          - over
+          - around
+          type: string
+          xml:
+            attribute: true
+            name: BowlingFromEnum
+        delivery_type:
+          enum:
+          - stock
+          - slower
+          - variation
+          - wrong_un
+          type: string
+          xml:
+            attribute: true
+            name: DeliveryTypeEnum
+        extra_runs_conceded:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        extra_runs_type:
+          enum:
+          - no_ball
+          - wide
+          - bye
+          - leg_bye
+          - no_ball_bye
+          - no_ball_leg_bye
+          type: string
+          xml:
+            attribute: true
+            name: DeliveryTypeEnum
+        other_bowler:
+          additionalProperties: false
+          properties:
+            country_code:
+              type: string
+              xml:
+                attribute: true
+            date_of_birth:
+              description: YYYY-MM-DD
+              format: date
+              type: string
+              xml:
+                attribute: true
+            gender:
+              $ref: '#/components/schemas/enum_gender'
+            height:
+              description: Height in cm
+              type: integer
+              xml:
+                attribute: true
+            id:
+              type: string
+              xml:
+                attribute: true
+            jersey_number:
+              type: integer
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+            nationality:
+              type: string
+              xml:
+                attribute: true
+            nickname:
+              type: string
+              xml:
+                attribute: true
+            type:
+              $ref: '#/components/schemas/enum_player_type'
+            weight:
+              description: Weight in kg
+              type: integer
+              xml:
+                attribute: true
+          required:
+          - id
+          - name
+          type: object
+          xml:
+            name: other_bowler
+        pitch_x:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        pitch_y:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        run_up:
+          enum:
+          - spinner
+          - short
+          - long
+          type: string
+          xml:
+            attribute: true
+            name: RunUpEnum
+      type: object
+      xml:
+        name: bowling_params
+        x-sr-object-name: BowlingParams
+    bowling_spell:
+      additionalProperties: false
+      properties:
+        bowling_extras:
+          type: integer
+          xml:
+            attribute: true
+        byes:
+          type: integer
+          xml:
+            attribute: true
+        conceded_runs:
+          type: integer
+          xml:
+            attribute: true
+        dot_balls:
+          type: integer
+          xml:
+            attribute: true
+        economy_rate:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        end:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        end_time:
+          format: date-time
+          type: string
+          xml:
+            attribute: true
+        maidens:
+          type: integer
+          xml:
+            attribute: true
+        no_balls:
+          type: integer
+          xml:
+            attribute: true
+        overs_bowled:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        player:
+          properties:
+            id:
+              type: string
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+          type: object
+          xml:
+            name: player
+            x-sr-object-name: BowlingSpellPlayer
+        spell_order:
+          type: integer
+          xml:
+            attribute: true
+        start:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        start_time:
+          format: date-time
+          type: string
+          xml:
+            attribute: true
+        wickets:
+          type: integer
+          xml:
+            attribute: true
+        wides:
+          type: integer
+          xml:
+            attribute: true
+      type: object
+      xml:
+        name: bowling_spell
+    catches:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: catches
+    category:
+      additionalProperties: false
+      properties:
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: category
+    coverage:
+      additionalProperties: false
+      properties:
+        sport_event_properties:
+          $ref: '#/components/schemas/coverage_sport_event_properties'
+        type:
+          enum:
+          - sport_event
+          type: string
+          xml:
+            attribute: true
+            name: CoverageTypeEnum
+      type: object
+      xml:
+        name: coverage
+        x-sr-object-name: CoverageCricket
+    coverage_sport_event_properties:
+      properties:
+        level:
+          enum:
+          - post
+          - core
+          - advanced
+          - fielding
+          type: string
+          xml:
+            attribute: true
+            name: CoverageSportEventPropertiesLevelEnum
+      type: object
+      xml:
+        name: sport_event_properties
+    current_season:
+      additionalProperties: false
+      properties:
+        end_date:
+          format: date
+          type: string
+          xml:
+            attribute: true
+        id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        start_date:
+          format: date
+          type: string
+          xml:
+            attribute: true
+        year:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: current_season
+    dismissal_details:
+      properties:
+        bowler_id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        decision_reason:
+          enum:
+          - no_contact_with_ball
+          - batsman_knicked_ball
+          - too_high
+          - too_wide
+          - hit_in_line_with_stumps
+          - hit_outside_line_of_stumps
+          - ball_height
+          - batsman_forward
+          - bowler_overstepped
+          - bowler_not_overstepped
+          - batsman_safe
+          - batsman_short_of_crease
+          - benefit_of_doubt
+          type: string
+          xml:
+            attribute: true
+            name: DecisionReasonEnum
+        fielder_id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        fielding_position:
+          enum:
+          - square_leg
+          - deep_square_leg
+          - backward_square_leg
+          - deep_backward_square_leg
+          - leg_gully
+          - leg_slip
+          - short_fine_leg
+          - deep_fine_leg
+          - wicket_keeper
+          - 1st_slip
+          - 2nd_slip
+          - 3rd_slip
+          - 4th_slip
+          - gully
+          - short_third_man
+          - deep_third_man
+          - point
+          - backward_point
+          - deep_backward_point
+          - sweeper
+          - cover_point
+          - silly_point
+          - short_cover
+          - cover
+          - deep_cover
+          - extra_cover
+          - deep_extra_cover
+          - mid_off
+          - short_mid_off
+          - long_off
+          - bowler
+          - mid_on
+          - short_mid_on
+          - long_on
+          - mid_wicket
+          - short_mid_wicket
+          - deep_mid_wicket
+          - short_leg
+          - square_short_leg
+          - forward_short_leg
+          - silly_mid_on
+          - fine_leg
+          - third_man
+          - deep_point
+          - short_point
+          type: string
+          xml:
+            attribute: true
+            name: FieldingPositionEnum
+        is_substitute_fielder:
+          type: boolean
+          xml:
+            attribute: true
+        on_strike:
+          type: boolean
+          xml:
+            attribute: true
+        result_in_favor:
+          type: boolean
+          xml:
+            attribute: true
+        team_referred:
+          enum:
+          - batting
+          - bowling
+          type: string
+          xml:
+            attribute: true
+            name: TeamReferredEnum
+        type:
+          enum:
+          - caught
+          - leg_before_wicket
+          - bowled
+          - stumped
+          - run_out
+          - hit_wicket
+          - retired_hurt
+          - hit_twice
+          - timed_out
+          - handled_ball
+          - obstructing_field
+          - retired
+          - retired_not_out
+          - absent
+          type: string
+          xml:
+            attribute: true
+            name: DismissalTypeEnum
+      type: object
+      xml:
+        name: dismissal_details
+    dismissal_params:
+      properties:
+        dismissal_details:
+          $ref: '#/components/schemas/dismissal_details'
+        player:
+          additionalProperties: false
+          properties:
+            country_code:
+              type: string
+              xml:
+                attribute: true
+            date_of_birth:
+              description: YYYY-MM-DD
+              format: date
+              type: string
+              xml:
+                attribute: true
+            gender:
+              $ref: '#/components/schemas/enum_gender'
+            height:
+              description: Height in cm
+              type: integer
+              xml:
+                attribute: true
+            id:
+              type: string
+              xml:
+                attribute: true
+            jersey_number:
+              type: integer
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+            nationality:
+              type: string
+              xml:
+                attribute: true
+            nickname:
+              type: string
+              xml:
+                attribute: true
+            type:
+              $ref: '#/components/schemas/enum_player_type'
+            weight:
+              description: Weight in kg
+              type: integer
+              xml:
+                attribute: true
+          required:
+          - id
+          - name
+          type: object
+          xml:
+            name: player
+      type: object
+      xml:
+        name: dismissal_params
+    dot_balls:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: dot_balls
+    economy:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        rate:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+      required:
+      - rank
+      - player
+      - rate
+      type: object
+      xml:
+        name: economy
+    enum_gender:
+      enum:
+      - female
+      - male
+      type: string
+      xml:
+        attribute: true
+        name: GenderEnum
+    enum_player_type:
+      enum:
+      - d
+      type: string
+      xml:
+        attribute: true
+        name: PlayerTypeEnum
+    field_umpire:
+      additionalProperties: false
+      properties:
+        correct_decision:
+          type: boolean
+          xml:
+            attribute: true
+        decision_reason:
+          enum:
+          - no_contact_with_ball
+          - batsman_knicked_ball
+          - too_high
+          - too_wide
+          - hit_in_line_with_stumps
+          - hit_outside_line_of_stumps
+          - ball_height
+          - bastman_forward
+          - bowler_overstepped
+          - bowler_not_overstepped
+          - batsman_safe
+          - batsman_short_of_crease
+          - benefit_of_doubt
+          type: string
+          xml:
+            attribute: true
+            name: DecisionReasonEnum
+        id:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        number:
+          type: integer
+          xml:
+            attribute: true
+        position:
+          type: string
+          xml:
+            attribute: true
+        type:
+          type: string
+          xml:
+            attribute: true
+        warning:
+          enum:
+          - running_on_danger_area
+          - excessive_appealing
+          - illegitimate_bowling_action
+          - one_bouncer_for_over
+          type: string
+          xml:
+            attribute: true
+            name: WarningEnum
+      required:
+      - id
+      - number
+      - name
+      type: object
+      xml:
+        name: field_umpire
+    fielding:
+      properties:
+        top_catches:
+          items:
+            $ref: '#/components/schemas/catches'
+          type: array
+          xml:
+            name: top_catches
+            wrapped: true
+      type: object
+      xml:
+        name: fielding
+        x-sr-object-name: Fielding
+    fielding_params:
+      properties:
+        appeal:
+          type: boolean
+          xml:
+            attribute: true
+        catch_dropped:
+          type: boolean
+          xml:
+            attribute: true
+        catch_dropped_location:
+          enum:
+          - deep_square_leg
+          - backward_square_leg
+          - deep_backward_square_leg
+          - leg_gully
+          - leg_slip
+          - short_fine_leg
+          - deep_fine_leg
+          - wicket_keeper
+          - 1st_slip
+          - 2nd_slip
+          - 3rd_slip
+          - 4th_slip
+          - gully
+          - short_third_man
+          - deep_third_man
+          - point
+          - backward_point
+          - deep_backward_point
+          - sweeper
+          - cover_point
+          - silly_point
+          - short_cover
+          - cover
+          - deep_cover
+          - extra_cover
+          - deep_extra_cover
+          - mid_off
+          - short_mid_off
+          - long_off
+          - bowler
+          - mid_on
+          - short_mid_on
+          - long_on
+          - mid_wicket
+          - short_mid_wicket
+          - deep_mid_wicket
+          - short_leg
+          - square_short_leg
+          - forward_short_leg
+          - silly_mid_on
+          - square_leg
+          - fine_leg
+          - third_man
+          - deep_point
+          - short_point
+          type: string
+          xml:
+            attribute: true
+            name: CatchDroppedLocationEnum
+        catch_dropper:
+          additionalProperties: false
+          properties:
+            country_code:
+              type: string
+              xml:
+                attribute: true
+            date_of_birth:
+              description: YYYY-MM-DD
+              format: date
+              type: string
+              xml:
+                attribute: true
+            gender:
+              $ref: '#/components/schemas/enum_gender'
+            height:
+              description: Height in cm
+              type: integer
+              xml:
+                attribute: true
+            id:
+              type: string
+              xml:
+                attribute: true
+            jersey_number:
+              type: integer
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+            nationality:
+              type: string
+              xml:
+                attribute: true
+            nickname:
+              type: string
+              xml:
+                attribute: true
+            type:
+              $ref: '#/components/schemas/enum_player_type'
+            weight:
+              description: Weight in kg
+              type: integer
+              xml:
+                attribute: true
+          required:
+          - id
+          - name
+          type: object
+          xml:
+            name: catch_dropper
+        difficulty_rating:
+          type: integer
+          xml:
+            attribute: true
+        direct_hit:
+          type: boolean
+          xml:
+            attribute: true
+        fielded:
+          type: boolean
+          xml:
+            attribute: true
+        fielded_wicket_keeper:
+          type: boolean
+          xml:
+            attribute: true
+        fielder:
+          additionalProperties: false
+          properties:
+            country_code:
+              type: string
+              xml:
+                attribute: true
+            date_of_birth:
+              description: YYYY-MM-DD
+              format: date
+              type: string
+              xml:
+                attribute: true
+            gender:
+              $ref: '#/components/schemas/enum_gender'
+            height:
+              description: Height in cm
+              type: integer
+              xml:
+                attribute: true
+            id:
+              type: string
+              xml:
+                attribute: true
+            jersey_number:
+              type: integer
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+            nationality:
+              type: string
+              xml:
+                attribute: true
+            nickname:
+              type: string
+              xml:
+                attribute: true
+            type:
+              $ref: '#/components/schemas/enum_player_type'
+            weight:
+              description: Weight in kg
+              type: integer
+              xml:
+                attribute: true
+          required:
+          - id
+          - name
+          type: object
+          xml:
+            name: fielder
+        misfielded:
+          type: boolean
+          xml:
+            attribute: true
+        overthrows:
+          type: integer
+          xml:
+            attribute: true
+        pressure_applied:
+          type: boolean
+          xml:
+            attribute: true
+        run_out_missed:
+          type: boolean
+          xml:
+            attribute: true
+        run_out_missed_location:
+          type: string
+          xml:
+            attribute: true
+        run_out_misser:
+          additionalProperties: false
+          properties:
+            country_code:
+              type: string
+              xml:
+                attribute: true
+            date_of_birth:
+              description: YYYY-MM-DD
+              format: date
+              type: string
+              xml:
+                attribute: true
+            gender:
+              $ref: '#/components/schemas/enum_gender'
+            height:
+              description: Height in cm
+              type: integer
+              xml:
+                attribute: true
+            id:
+              type: string
+              xml:
+                attribute: true
+            jersey_number:
+              type: integer
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+            nationality:
+              type: string
+              xml:
+                attribute: true
+            nickname:
+              type: string
+              xml:
+                attribute: true
+            type:
+              $ref: '#/components/schemas/enum_player_type'
+            weight:
+              description: Weight in kg
+              type: integer
+              xml:
+                attribute: true
+          required:
+          - id
+          - name
+          type: object
+          xml:
+            name: run_out_misser
+        runs_lost:
+          type: integer
+          xml:
+            attribute: true
+        runs_saved:
+          type: integer
+          xml:
+            attribute: true
+        stumping_missed:
+          type: boolean
+          xml:
+            attribute: true
+        stumping_misser:
+          additionalProperties: false
+          properties:
+            country_code:
+              type: string
+              xml:
+                attribute: true
+            date_of_birth:
+              description: YYYY-MM-DD
+              format: date
+              type: string
+              xml:
+                attribute: true
+            gender:
+              $ref: '#/components/schemas/enum_gender'
+            height:
+              description: Height in cm
+              type: integer
+              xml:
+                attribute: true
+            id:
+              type: string
+              xml:
+                attribute: true
+            jersey_number:
+              type: integer
+              xml:
+                attribute: true
+            name:
+              type: string
+              xml:
+                attribute: true
+            nationality:
+              type: string
+              xml:
+                attribute: true
+            nickname:
+              type: string
+              xml:
+                attribute: true
+            type:
+              $ref: '#/components/schemas/enum_player_type'
+            weight:
+              description: Weight in kg
+              type: integer
+              xml:
+                attribute: true
+          required:
+          - id
+          - name
+          type: object
+          xml:
+            name: stumping_misser
+      type: object
+      xml:
+        name: fielding_params
+        x-sr-object-name: FieldingParams
+    fifties:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: fifties
+    fours:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: fours
+    group:
+      properties:
+        name:
+          type: string
+          xml:
+            attribute: true
+        teams:
+          items:
+            $ref: '#/components/schemas/team'
+          type: array
+          xml:
+            name: team
+            wrapped: true
+      required:
+      - teams
+      type: object
+      xml:
+        name: group
+        wrapped: true
+        x-sr-object-name: TournamentInfoGroup
+    highest_average:
+      properties:
+        average:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+      required:
+      - rank
+      - player
+      - average
+      type: object
+      xml:
+        name: highest_average
+    hundreds:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: hundreds
+    inning:
+      additionalProperties: false
+      properties:
+        batting_team:
+          type: string
+          xml:
+            attribute: true
+        bowling_team:
+          type: string
+          xml:
+            attribute: true
+        number:
+          type: integer
+          xml:
+            attribute: true
+        overs_completed:
+          type: integer
+          xml:
+            attribute: true
+        teams:
+          items:
+            additionalProperties: false
+            properties:
+              abbreviation:
+                type: string
+                xml:
+                  attribute: true
+              age_group:
+                enum:
+                - U23
+                - U22
+                - U21
+                - U20
+                - U19
+                - U18
+                - U17
+                - U16
+                - U15
+                - U14
+                - U13
+                - U12
+                - U11
+                - Y10
+                - Juniors
+                - Youth
+                - Unconfirmed
+                type: string
+                xml:
+                  attribute: true
+                  name: AgeGroupEnum
+              category:
+                $ref: '#/components/schemas/category'
+              country:
+                type: string
+                xml:
+                  attribute: true
+              country_code:
+                type: string
+                xml:
+                  attribute: true
+              gender:
+                type: string
+                xml:
+                  attribute: true
+              id:
+                description: URN
+                type: string
+                xml:
+                  attribute: true
+              ioc_code:
+                type: string
+                xml:
+                  attribute: true
+              name:
+                type: string
+                xml:
+                  attribute: true
+              qualifier:
+                enum:
+                - home
+                - away
+                type: string
+                xml:
+                  attribute: true
+                  name: QualifierEnum
+              sport:
+                $ref: '#/components/schemas/sport'
+              statistics:
+                properties:
+                  batting:
+                    properties:
+                      balls_faced:
+                        type: integer
+                        xml:
+                          attribute: true
+                      balls_remaining:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_fifties:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_hundreds:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_left_alone:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_cover:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_defending:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_fine_leg:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_mid_off:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_mid_on:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_mid_wicket:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_offside:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_onside:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_point:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_semi_attacking:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_square_leg:
+                        type: integer
+                        xml:
+                          attribute: true
+                      batting_shots_third_man:
+                        type: integer
+                        xml:
+                          attribute: true
+                      dot_balls:
+                        type: integer
+                        xml:
+                          attribute: true
+                      fours:
+                        type: integer
+                        xml:
+                          attribute: true
+                      minutes_at_crease:
+                        type: integer
+                        xml:
+                          attribute: true
+                      overs_remaining:
+                        type: integer
+                        xml:
+                          attribute: true
+                      partnerships:
+                        items:
+                          $ref: '#/components/schemas/partnership'
+                        type: array
+                        xml:
+                          name: partnerships
+                          wrapped: true
+                      penalty_runs:
+                        type: integer
+                        xml:
+                          attribute: true
+                      players:
+                        items:
+                          $ref: '#/components/schemas/sport_event_player_statistics'
+                        type: array
+                        xml:
+                          name: players
+                          wrapped: true
+                          x-sr-object-name: SportEventCompetitorStatisticsPlayerStatistics
+                      reviews_remaining:
+                        type: integer
+                        xml:
+                          attribute: true
+                      run_rate:
+                        format: float
+                        type: number
+                        xml:
+                          attribute: true
+                      runs:
+                        format: float
+                        type: number
+                        xml:
+                          attribute: true
+                      shots_attacking:
+                        type: integer
+                        xml:
+                          attribute: true
+                      sixes:
+                        type: integer
+                        xml:
+                          attribute: true
+                      strike_rate:
+                        format: float
+                        type: number
+                        xml:
+                          attribute: true
+                      threes:
+                        type: integer
+                        xml:
+                          attribute: true
+                      twos:
+                        type: integer
+                        xml:
+                          attribute: true
+                      wickets_lost:
+                        type: integer
+                        xml:
+                          attribute: true
+                    type: object
+                    xml:
+                      name: batting
+                  bowling:
+                    properties:
+                      appeals:
+                        type: integer
+                        xml:
+                          attribute: true
+                      around_the_wicket:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_average_speed:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_beat_bats:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_bouncers:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_catches:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_conceded_fours:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_conceded_sixes:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_extras:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_rapped_on_pads:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_reviews_remaining:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_run_outs:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_slower_deliveries:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_spells:
+                        items:
+                          $ref: '#/components/schemas/bowling_spell'
+                        type: array
+                        xml:
+                          name: bowling_spells
+                          wrapped: true
+                      bowling_stumpings:
+                        type: integer
+                        xml:
+                          attribute: true
+                      bowling_yorkers:
+                        type: integer
+                        xml:
+                          attribute: true
+                      byes:
+                        type: integer
+                        xml:
+                          attribute: true
+                      conceded_runs:
+                        type: integer
+                        xml:
+                          attribute: true
+                      dot_balls:
+                        type: integer
+                        xml:
+                          attribute: true
+                      edges:
+                        type: integer
+                        xml:
+                          attribute: true
+                      leg_byes:
+                        type: integer
+                        xml:
+                          attribute: true
+                      maidens:
+                        type: integer
+                        xml:
+                          attribute: true
+                      no_balls:
+                        type: integer
+                        xml:
+                          attribute: true
+                      over_the_wicket:
+                        type: integer
+                        xml:
+                          attribute: true
+                      overs_bowled:
+                        format: float
+                        type: number
+                        xml:
+                          attribute: true
+                      players:
+                        items:
+                          $ref: '#/components/schemas/sport_event_player_statistics'
+                        type: array
+                        xml:
+                          name: players
+                          wrapped: true
+                          x-sr-object-name: SportEventCompetitorStatisticsPlayerStatistics
+                      wickets:
+                        type: integer
+                        xml:
+                          attribute: true
+                      wides:
+                        type: integer
+                        xml:
+                          attribute: true
+                    type: object
+                    xml:
+                      name: bowling
+                type: object
+                xml:
+                  name: statistics
+                  x-sr-object-name: CompetitorStatisticsStatistics
+              virtual:
+                type: boolean
+                xml:
+                  attribute: true
+            required:
+            - id
+            - name
+            - abbreviation
+            type: object
+            xml:
+              name: team
+              x-sr-object-name: CompetitorStatistics
+          type: array
+          xml:
+            name: teams
+            wrapped: true
+            x-sr-object-name: CompetitorStatisticsCompetitors
+      type: object
+      xml:
+        name: inning
+        x-sr-object-name: SportEventInning
+    lineup:
+      maxItems: 2
+      minItems: 2
+      properties:
+        formation:
+          type: string
+          xml:
+            attribute: true
+        manager:
+          $ref: '#/components/schemas/manager'
+        starting_lineup:
+          items:
+            $ref: '#/components/schemas/lineup_player'
+          type: array
+          xml:
+            name: starting_lineup
+            wrapped: true
+        team:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - team
+      type: object
+      xml:
+        name: lineup
+    lineup_player:
+      additionalProperties: false
+      properties:
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        date_of_birth:
+          description: YYYY-MM-DD
+          format: date
+          type: string
+          xml:
+            attribute: true
+        gender:
+          $ref: '#/components/schemas/enum_gender'
+        height:
+          description: Height in cm
+          type: integer
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        is_captain:
+          type: boolean
+          xml:
+            attribute: true
+        is_wicketkeeper:
+          type: boolean
+          xml:
+            attribute: true
+        jersey_number:
+          type: integer
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        nationality:
+          type: string
+          xml:
+            attribute: true
+        nickname:
+          type: string
+          xml:
+            attribute: true
+        order:
+          type: integer
+          xml:
+            attribute: true
+        position:
+          type: string
+          xml:
+            attribute: true
+        type:
+          $ref: '#/components/schemas/enum_player_type'
+        weight:
+          description: Weight in kg
+          type: integer
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: player
+    maidens:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: maidens
+    manager:
+      additionalProperties: false
+      properties:
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        date_of_birth:
+          type: string
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        ioc_code:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        nationality:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: manager
+    match_notes:
+      items:
+        $ref: '#/components/schemas/note'
+      type: array
+      xml:
+        name: match_notes
+        wrapped: true
+    non_striker:
+      additionalProperties: false
+      properties:
+        balls_faced_so_far:
+          type: integer
+          xml:
+            attribute: true
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        date_of_birth:
+          description: YYYY-MM-DD
+          format: date
+          type: string
+          xml:
+            attribute: true
+        fours:
+          type: integer
+          xml:
+            attribute: true
+        gender:
+          $ref: '#/components/schemas/enum_gender'
+        height:
+          description: Height in cm
+          type: integer
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        jersey_number:
+          type: integer
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        nationality:
+          type: string
+          xml:
+            attribute: true
+        nickname:
+          type: string
+          xml:
+            attribute: true
+        runs_scored_so_far:
+          type: integer
+          xml:
+            attribute: true
+        sixes:
+          type: integer
+          xml:
+            attribute: true
+        type:
+          $ref: '#/components/schemas/enum_player_type'
+        weight:
+          description: Weight in kg
+          type: integer
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: non_striker
+    note:
+      properties:
+        text:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - text
+      type: object
+      xml:
+        name: note
+    partnership:
+      additionalProperties: false
+      properties:
+        balls_faced:
+          type: integer
+          xml:
+            attribute: true
+        dismissed_player:
+          type: string
+          xml:
+            attribute: true
+        end:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        end_time:
+          format: date-time
+          type: string
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        minutes_at_crease:
+          type: integer
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        overs:
+          type: integer
+          xml:
+            attribute: true
+        players:
+          items:
+            $ref: '#/components/schemas/partnership_player_statistics'
+          type: array
+          xml:
+            name: players
+            wrapped: true
+        runs:
+          type: integer
+          xml:
+            attribute: true
+        runs_extras:
+          type: integer
+          xml:
+            attribute: true
+        start:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        start_time:
+          format: date-time
+          type: string
+          xml:
+            attribute: true
+        wicket_number:
+          type: integer
+          xml:
+            attribute: true
+      type: object
+      xml:
+        name: partnership
+    partnership_player_statistics:
+      additionalProperties: false
+      properties:
+        balls_faced:
+          type: integer
+          xml:
+            attribute: true
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        dot_balls:
+          type: integer
+          xml:
+            attribute: true
+        fours:
+          type: integer
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        ones:
+          type: integer
+          xml:
+            attribute: true
+        order:
+          type: integer
+          xml:
+            attribute: true
+        runs:
+          type: integer
+          xml:
+            attribute: true
+        sixes:
+          type: integer
+          xml:
+            attribute: true
+        status:
+          enum:
+          - OUT
+          - NOT_OUT
+          - RETIRED
+          type: string
+          xml:
+            attribute: true
+            name: PlayerStatusEnum
+        strike_rate:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        threes:
+          type: integer
+          xml:
+            attribute: true
+        twos:
+          type: integer
+          xml:
+            attribute: true
+      type: object
+      xml:
+        name: player
+        x-sr-object-name: PlayerPartnerShipStatistics
+    period_score:
+      properties:
+        allotted_overs:
+          type: integer
+          xml:
+            attribute: true
+        away_score:
+          type: integer
+          xml:
+            attribute: true
+        away_wickets:
+          type: integer
+          xml:
+            attribute: true
+        display_overs:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        display_score:
+          type: string
+          xml:
+            attribute: true
+        home_score:
+          type: integer
+          xml:
+            attribute: true
+        home_wickets:
+          type: integer
+          xml:
+            attribute: true
+        number:
+          type: integer
+          xml:
+            attribute: true
+        type:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - type
+      - number
+      type: object
+      xml:
+        name: period_score
+    pitch_info:
+      additionalProperties: false
+      properties:
+        boundary_position:
+          enum:
+          - in
+          - normal
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: BoundaryPositionEnum
+        grass_cover:
+          enum:
+          - barren
+          - normal
+          - green
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: GrassCoverEnum
+        pitch_moisture:
+          enum:
+          - very_dry
+          - dry
+          - normal
+          - moist
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: PitchMoistureEnum
+        pitch_quality:
+          enum:
+          - normal
+          - delayed
+          - deteriorating
+          - slow
+          - low
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: PitchQualityEnum
+      type: object
+      xml:
+        name: pitch_info
+    player:
+      properties:
+        batting_style:
+          type: string
+          xml:
+            attribute: true
+        bowling_style:
+          type: string
+          xml:
+            attribute: true
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        date_of_birth:
+          type: string
+          xml:
+            attribute: true
+        full_name:
+          type: string
+          xml:
+            attribute: true
+        gender:
+          format: date
+          type: string
+          xml:
+            attribute: true
+        height:
+          type: integer
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        jersey_number:
+          type: integer
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        nationality:
+          type: string
+          xml:
+            attribute: true
+        nick_name:
+          type: string
+          xml:
+            attribute: true
+        nickname:
+          type: string
+          xml:
+            attribute: true
+        place_of_birth:
+          type: string
+          xml:
+            attribute: true
+        type:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: player
+        x-sr-object-name: PlayerBasicType
+    player_basics:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+      type: object
+      xml:
+        name: player
+    referee:
+      additionalProperties: false
+      properties:
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        nationality:
+          type: string
+          xml:
+            attribute: true
+        type:
+          enum:
+          - main_referee
+          type: string
+          xml:
+            attribute: true
+            name: RefereeTypeEnum
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: referee
+    result:
+      properties:
+        sport_event:
+          $ref: '#/components/schemas/sport_event'
+        sport_event_status:
+          $ref: '#/components/schemas/sport_event_status'
+      type: object
+      xml:
+        name: result
+    role:
+      properties:
+        active:
+          enum:
+          - "true"
+          - "false"
+          type: boolean
+          xml:
+            attribute: true
+            name: RoleActiveEnum
+        end_date:
+          format: date
+          type: string
+          xml:
+            attribute: true
+        jersey_number:
+          type: integer
+          xml:
+            attribute: true
+        start_date:
+          format: date
+          type: string
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        type:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - team
+      - type
+      - active
+      type: object
+      xml:
+        name: role
+        x-sr-object-name: PlayerRole
+    runs:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: runs
+    season_coverage_info:
+      additionalProperties: false
+      properties:
+        max_coverage_level:
+          type: string
+          xml:
+            attribute: true
+        max_covered:
+          type: string
+          xml:
+            attribute: true
+        min_coverage_level:
+          type: string
+          xml:
+            attribute: true
+        played:
+          type: integer
+          xml:
+            attribute: true
+        scheduled:
+          type: integer
+          xml:
+            attribute: true
+        season_id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+      required:
+      - season_id
+      - scheduled
+      - played
+      type: object
+      xml:
+        name: season_coverage_info
+    season_extended:
+      additionalProperties: false
+      properties:
+        end_date:
+          format: date
+          type: string
+          xml:
+            attribute: true
+        id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        start_date:
+          format: date
+          type: string
+          xml:
+            attribute: true
+        tournament_id:
+          type: string
+          xml:
+            attribute: true
+        year:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      - start_date
+      - end_date
+      - year
+      type: object
+      xml:
+        name: season
+        x-sr-object-name: SeasonExtended
+    simple_umpire:
+      properties:
+        id:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        number:
+          type: integer
+          xml:
+            attribute: true
+        type:
+          enum:
+          - 3rd
+          - on_field
+          type: string
+          xml:
+            attribute: true
+            name: type
+      type: object
+      xml:
+        name: umpire
+        x-sr-object-name: SimpleUmpire
+    sixes:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: sixes
+    sport:
+      additionalProperties: false
+      properties:
+        id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: sport
+    sport_event:
+      additionalProperties: false
+      properties:
+        competitors:
+          items:
+            $ref: '#/components/schemas/team'
+          type: array
+          xml:
+            name: competitors
+            wrapped: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        replaced_by:
+          description: Match has been replaced with another match.
+          type: string
+          xml:
+            attribute: true
+        scheduled:
+          format: date-time
+          type: string
+          xml:
+            attribute: true
+        season:
+          $ref: '#/components/schemas/season_extended'
+        sport_event_conditions:
+          $ref: '#/components/schemas/sport_event_conditions'
+        start_time_tbd:
+          type: boolean
+          xml:
+            attribute: true
+        status:
+          type: string
+          xml:
+            attribute: true
+        tour:
+          $ref: '#/components/schemas/tour'
+        tournament:
+          $ref: '#/components/schemas/tournament'
+        tournament_round:
+          $ref: '#/components/schemas/tournament_round'
+        venue:
+          $ref: '#/components/schemas/venue'
+      required:
+      - id
+      type: object
+      xml:
+        name: sport_event
+    sport_event_competitor_statistics:
+      properties:
+        statistics:
+          properties:
+            batting:
+              properties:
+                balls_faced:
+                  type: integer
+                  xml:
+                    attribute: true
+                balls_remaining:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_fifties:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_hundreds:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_left_alone:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_cover:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_defending:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_fine_leg:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_mid_off:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_mid_on:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_mid_wicket:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_offside:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_onside:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_point:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_semi_attacking:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_square_leg:
+                  type: integer
+                  xml:
+                    attribute: true
+                batting_shots_third_man:
+                  type: integer
+                  xml:
+                    attribute: true
+                dot_balls:
+                  type: integer
+                  xml:
+                    attribute: true
+                fours:
+                  type: integer
+                  xml:
+                    attribute: true
+                minutes_at_crease:
+                  type: integer
+                  xml:
+                    attribute: true
+                overs_remaining:
+                  type: integer
+                  xml:
+                    attribute: true
+                partnerships:
+                  items:
+                    $ref: '#/components/schemas/partnership'
+                  type: array
+                  xml:
+                    name: partnerships
+                    wrapped: true
+                penalty_runs:
+                  type: integer
+                  xml:
+                    attribute: true
+                players:
+                  items:
+                    $ref: '#/components/schemas/sport_event_player_statistics'
+                  type: array
+                  xml:
+                    name: players
+                    wrapped: true
+                    x-sr-object-name: SportEventCompetitorStatisticsPlayerStatistics
+                reviews_remaining:
+                  type: integer
+                  xml:
+                    attribute: true
+                run_rate:
+                  format: float
+                  type: number
+                  xml:
+                    attribute: true
+                runs:
+                  format: float
+                  type: number
+                  xml:
+                    attribute: true
+                shots_attacking:
+                  type: integer
+                  xml:
+                    attribute: true
+                sixes:
+                  type: integer
+                  xml:
+                    attribute: true
+                strike_rate:
+                  format: float
+                  type: number
+                  xml:
+                    attribute: true
+                threes:
+                  type: integer
+                  xml:
+                    attribute: true
+                twos:
+                  type: integer
+                  xml:
+                    attribute: true
+                wickets_lost:
+                  type: integer
+                  xml:
+                    attribute: true
+              type: object
+              xml:
+                name: batting
+            bowling:
+              properties:
+                appeals:
+                  type: integer
+                  xml:
+                    attribute: true
+                around_the_wicket:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_average_speed:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_beat_bats:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_bouncers:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_catches:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_conceded_fours:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_conceded_sixes:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_extras:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_rapped_on_pads:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_reviews_remaining:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_run_outs:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_slower_deliveries:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_spells:
+                  items:
+                    $ref: '#/components/schemas/bowling_spell'
+                  type: array
+                  xml:
+                    name: bowling_spells
+                    wrapped: true
+                bowling_stumpings:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowling_yorkers:
+                  type: integer
+                  xml:
+                    attribute: true
+                byes:
+                  type: integer
+                  xml:
+                    attribute: true
+                conceded_runs:
+                  type: integer
+                  xml:
+                    attribute: true
+                dot_balls:
+                  type: integer
+                  xml:
+                    attribute: true
+                edges:
+                  type: integer
+                  xml:
+                    attribute: true
+                leg_byes:
+                  type: integer
+                  xml:
+                    attribute: true
+                maidens:
+                  type: integer
+                  xml:
+                    attribute: true
+                no_balls:
+                  type: integer
+                  xml:
+                    attribute: true
+                over_the_wicket:
+                  type: integer
+                  xml:
+                    attribute: true
+                overs_bowled:
+                  format: float
+                  type: number
+                  xml:
+                    attribute: true
+                players:
+                  items:
+                    $ref: '#/components/schemas/sport_event_player_statistics'
+                  type: array
+                  xml:
+                    name: players
+                    wrapped: true
+                    x-sr-object-name: SportEventCompetitorStatisticsPlayerStatistics
+                wickets:
+                  type: integer
+                  xml:
+                    attribute: true
+                wides:
+                  type: integer
+                  xml:
+                    attribute: true
+              type: object
+              xml:
+                name: bowling
+          type: object
+          xml:
+            name: statistics
+            x-sr-object-name: CompetitorStatisticsStatistics
+      type: object
+      xml:
+        name: team
+        x-sr-object-name: CompetitorStatistics
+    sport_event_conditions:
+      properties:
+        comment:
+          properties:
+            text:
+              type: string
+              xml:
+                attribute: true
+          type: object
+          xml:
+            name: comment
+        day_night:
+          enum:
+          - day
+          - night
+          type: string
+          xml:
+            attribute: true
+            name: DayNightEnum
+        neutral_venue:
+          type: boolean
+          xml:
+            attribute: true
+        outfield_info:
+          properties:
+            outfield_conditions:
+              enum:
+              - slow
+              - normal
+              - fast
+              type: string
+              xml:
+                attribute: true
+                name: OutFieldConditionsEnum
+          type: object
+          xml:
+            name: outfield_info
+        pitch_info:
+          $ref: '#/components/schemas/pitch_info'
+        referees:
+          properties:
+            referee:
+              $ref: '#/components/schemas/referee'
+            umpires:
+              items:
+                $ref: '#/components/schemas/simple_umpire'
+              type: array
+              xml:
+                name: umpires
+                wrapped: true
+          type: object
+          xml:
+            name: referees
+        type:
+          enum:
+          - test
+          - odi
+          - t10
+          - t20i
+          - first_class
+          - list_a
+          - t20
+          type: string
+          xml:
+            attribute: true
+            name: ConditionsCompetitionTypeEnum
+        weather_info:
+          $ref: '#/components/schemas/weather_info'
+      type: object
+      xml:
+        name: sport_event_conditions
+    sport_event_player_statistics:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        statistics:
+          properties:
+            appeals:
+              type: integer
+              xml:
+                attribute: true
+            around_the_wicket:
+              type: integer
+              xml:
+                attribute: true
+            balls_faced:
+              type: integer
+              xml:
+                attribute: true
+            batting_fifties:
+              type: integer
+              xml:
+                attribute: true
+            batting_hundreds:
+              type: integer
+              xml:
+                attribute: true
+            batting_left_alone:
+              type: integer
+              xml:
+                attribute: true
+            batting_not_out:
+              type: boolean
+              xml:
+                attribute: true
+            batting_retired_hurt:
+              type: boolean
+              xml:
+                attribute: true
+            batting_shots_cover:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_defending:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_fine_leg:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_mid_off:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_mid_on:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_mid_wicket:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_offside:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_onside:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_point:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_semi_attacking:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_square_leg:
+              type: integer
+              xml:
+                attribute: true
+            batting_shots_third_man:
+              type: integer
+              xml:
+                attribute: true
+            bowling_average_speed:
+              type: integer
+              xml:
+                attribute: true
+            bowling_beat_bats:
+              type: integer
+              xml:
+                attribute: true
+            bowling_bouncers:
+              type: integer
+              xml:
+                attribute: true
+            bowling_catches:
+              type: integer
+              xml:
+                attribute: true
+            bowling_conceded_fours:
+              type: integer
+              xml:
+                attribute: true
+            bowling_conceded_sixes:
+              type: integer
+              xml:
+                attribute: true
+            bowling_extras:
+              type: integer
+              xml:
+                attribute: true
+            bowling_fastest_delivery:
+              type: integer
+              xml:
+                attribute: true
+            bowling_rapped_on_pads:
+              type: integer
+              xml:
+                attribute: true
+            bowling_run_outs:
+              type: integer
+              xml:
+                attribute: true
+            bowling_slower_deliveries:
+              type: integer
+              xml:
+                attribute: true
+            bowling_slowest_delivery:
+              type: integer
+              xml:
+                attribute: true
+            bowling_stumpings:
+              type: integer
+              xml:
+                attribute: true
+            bowling_yorkers:
+              type: integer
+              xml:
+                attribute: true
+            byes:
+              type: integer
+              xml:
+                attribute: true
+            conceded_runs:
+              type: integer
+              xml:
+                attribute: true
+            dismissal:
+              properties:
+                ball_number:
+                  type: integer
+                  xml:
+                    attribute: true
+                bowler_id:
+                  type: string
+                  xml:
+                    attribute: true
+                fielder_id:
+                  type: string
+                  xml:
+                    attribute: true
+                over_number:
+                  type: integer
+                  xml:
+                    attribute: true
+                type:
+                  enum:
+                  - unknown
+                  - caught
+                  - leg_before_wicket
+                  - bowled
+                  - stumped
+                  - run_out
+                  - hit_wicket
+                  - retired_hurt
+                  - hit_twice
+                  - timed_out
+                  - handled_ball
+                  - obstructing_field
+                  - retired
+                  - retired_not_out
+                  - absent
+                  type: string
+                  xml:
+                    attribute: true
+                    name: DismissalTypeEnum
+              type: object
+              xml:
+                name: dismissal
+                x-sr-object-name: SportEventCompetitorsStatisticsPlayerStatisticDismissal
+            dot_balls:
+              type: integer
+              xml:
+                attribute: true
+            economy_rate:
+              format: float
+              type: number
+              xml:
+                attribute: true
+            edges:
+              type: integer
+              xml:
+                attribute: true
+            fours:
+              type: integer
+              xml:
+                attribute: true
+            leg_byes:
+              type: integer
+              xml:
+                attribute: true
+            maidens:
+              type: integer
+              xml:
+                attribute: true
+            minutes_at_crease:
+              type: integer
+              xml:
+                attribute: true
+            no_balls:
+              type: integer
+              xml:
+                attribute: true
+            ones:
+              type: integer
+              xml:
+                attribute: true
+            order:
+              type: integer
+              xml:
+                attribute: true
+            over_the_wicket:
+              type: integer
+              xml:
+                attribute: true
+            overs_bowled:
+              format: float
+              type: number
+              xml:
+                attribute: true
+            runs:
+              type: integer
+              xml:
+                attribute: true
+            shots_attacking:
+              type: integer
+              xml:
+                attribute: true
+            sixes:
+              type: integer
+              xml:
+                attribute: true
+            strike_rate:
+              format: float
+              type: number
+              xml:
+                attribute: true
+            threes:
+              type: integer
+              xml:
+                attribute: true
+            twos:
+              type: integer
+              xml:
+                attribute: true
+            wickets:
+              type: integer
+              xml:
+                attribute: true
+            wides:
+              type: integer
+              xml:
+                attribute: true
+          type: object
+          xml:
+            name: statistics
+            x-sr-object-name: SportEventCompetitorsStatisticsPlayerStatistic
+      type: object
+      xml:
+        name: player
+        x-sr-object-name: CompetitorsStatisticsPlayer
+    sport_event_statistics:
+      properties:
+        innings:
+          items:
+            $ref: '#/components/schemas/inning'
+          type: array
+          xml:
+            name: innings
+            wrapped: true
+            x-sr-object-name: SportEventInningsStatistics
+      type: object
+      xml:
+        name: statistics
+        x-sr-object-name: SportEventCricketStatistics
+    sport_event_status:
+      properties:
+        allotted_overs:
+          type: integer
+          xml:
+            attribute: true
+        current_inning:
+          type: integer
+          xml:
+            attribute: true
+        current_session:
+          type: integer
+          xml:
+            attribute: true
+        decided_by_fed:
+          type: boolean
+          xml:
+            attribute: true
+        display_overs:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        display_score:
+          type: string
+          xml:
+            attribute: true
+        match_day:
+          type: integer
+          xml:
+            attribute: true
+        match_status:
+          type: string
+          xml:
+            attribute: true
+        period_scores:
+          items:
+            $ref: '#/components/schemas/period_score'
+          type: array
+          xml:
+            name: period_scores
+            wrapped: true
+        remaining_overs:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        required_run_rate:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        run_rate:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        run_rate_required:
+          type: string
+          xml:
+            attribute: true
+        status:
+          type: string
+          xml:
+            attribute: true
+        target:
+          type: integer
+          xml:
+            attribute: true
+        toss_decision:
+          type: string
+          xml:
+            attribute: true
+        toss_won_by:
+          type: string
+          xml:
+            attribute: true
+        winner_id:
+          type: string
+          xml:
+            attribute: true
+      type: object
+      xml:
+        name: sport_event_status
+    standing:
+      properties:
+        groups:
+          items:
+            $ref: '#/components/schemas/standing_group'
+          type: array
+          xml:
+            name: groups
+            wrapped: true
+            x-sr-object-name: StandingGroups
+        round:
+          type: integer
+          xml:
+            attribute: true
+        type:
+          type: string
+          xml:
+            attribute: true
+      type: object
+      xml:
+        name: standing
+        x-sr-object-name: tournamentStanding
+    standing_group:
+      properties:
+        group_name:
+          type: string
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        live:
+          type: boolean
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        team_standings:
+          items:
+            $ref: '#/components/schemas/team_standing'
+          type: array
+          xml:
+            name: team_standings
+            wrapped: true
+      type: object
+      xml:
+        name: group
+        x-sr-object-name: StandingGroup
+    strike_rate:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        rate:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+      required:
+      - rank
+      - player
+      - rate
+      type: object
+      xml:
+        name: strike_rate
+    striker:
+      additionalProperties: false
+      properties:
+        balls_faced_so_far:
+          type: integer
+          xml:
+            attribute: true
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        date_of_birth:
+          description: YYYY-MM-DD
+          format: date
+          type: string
+          xml:
+            attribute: true
+        fours:
+          type: integer
+          xml:
+            attribute: true
+        gender:
+          $ref: '#/components/schemas/enum_gender'
+        height:
+          description: Height in cm
+          type: integer
+          xml:
+            attribute: true
+        id:
+          type: string
+          xml:
+            attribute: true
+        jersey_number:
+          type: integer
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        nationality:
+          type: string
+          xml:
+            attribute: true
+        nickname:
+          type: string
+          xml:
+            attribute: true
+        runs_scored_so_far:
+          type: integer
+          xml:
+            attribute: true
+        sixes:
+          type: integer
+          xml:
+            attribute: true
+        type:
+          $ref: '#/components/schemas/enum_player_type'
+        weight:
+          description: Weight in kg
+          type: integer
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: striker
+    team:
+      additionalProperties: false
+      properties:
+        abbreviation:
+          type: string
+          xml:
+            attribute: true
+        age_group:
+          enum:
+          - U23
+          - U22
+          - U21
+          - U20
+          - U19
+          - U18
+          - U17
+          - U16
+          - U15
+          - U14
+          - U13
+          - U12
+          - U11
+          - Y10
+          - Juniors
+          - Youth
+          - Unconfirmed
+          type: string
+          xml:
+            attribute: true
+            name: AgeGroupEnum
+        category:
+          $ref: '#/components/schemas/category'
+        country:
+          type: string
+          xml:
+            attribute: true
+        country_code:
+          type: string
+          xml:
+            attribute: true
+        gender:
+          type: string
+          xml:
+            attribute: true
+        id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        ioc_code:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        qualifier:
+          enum:
+          - home
+          - away
+          type: string
+          xml:
+            attribute: true
+            name: QualifierEnum
+        sport:
+          $ref: '#/components/schemas/sport'
+        virtual:
+          type: boolean
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      - abbreviation
+      type: object
+      xml:
+        name: team
+    team_standing:
+      additionalProperties: false
+      properties:
+        change:
+          type: integer
+          xml:
+            attribute: true
+        current_outcome:
+          type: string
+          xml:
+            attribute: true
+        draw:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        loss:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        net_run_rate:
+          format: float
+          type: number
+          xml:
+            attribute: true
+        no_result:
+          type: integer
+          xml:
+            attribute: true
+        played:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        points:
+          type: integer
+          xml:
+            attribute: true
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        win:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - team
+      - rank
+      - played
+      - win
+      - draw
+      - loss
+      - points
+      - change
+      type: object
+      xml:
+        name: team_standing
+    third_umpire:
+      additionalProperties: false
+      properties:
+        correct_decision:
+          type: boolean
+          xml:
+            attribute: true
+        decision_reason:
+          enum:
+          - no_contact_with_ball
+          - batsman_knicked_ball
+          - too_high
+          - too_wide
+          - hit_in_line_with_stumps
+          - hit_outside_line_of_stumps
+          - ball_height
+          - bastman_forward
+          - bowler_overstepped
+          - bowler_not_overstepped
+          - batsman_safe
+          - batsman_short_of_crease
+          - benefit_of_doubt
+          type: string
+          xml:
+            attribute: true
+            name: DecisionReasonEnum
+        id:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        number:
+          type: integer
+          xml:
+            attribute: true
+        position:
+          type: string
+          xml:
+            attribute: true
+        type:
+          type: string
+          xml:
+            attribute: true
+        warning:
+          enum:
+          - running_on_danger_area
+          - excessive_appealing
+          - illegitimate_bowling_action
+          - one_bouncer_for_over
+          type: string
+          xml:
+            attribute: true
+            name: WarningEnum
+      required:
+      - id
+      - number
+      - name
+      type: object
+      xml:
+        name: third_umpire
+    timeline:
+      items:
+        $ref: '#/components/schemas/timeline_event'
+      type: array
+      xml:
+        name: timeline
+        wrapped: true
+    timeline_event:
+      properties:
+        ball_number:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        batting_params:
+          $ref: '#/components/schemas/batting_params'
+        bowling_params:
+          $ref: '#/components/schemas/bowling_params'
+        commentary:
+          properties:
+            text:
+              type: string
+              xml:
+                attribute: true
+          type: object
+          xml:
+            name: commentary
+        delivery:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        dismissal_params:
+          $ref: '#/components/schemas/dismissal_params'
+        dismissals_away:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        dismissals_home:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        display_overs:
+          type: string
+          xml:
+            attribute: true
+        display_score:
+          type: string
+          xml:
+            attribute: true
+        drs:
+          type: boolean
+          xml:
+            attribute: true
+        fielding_params:
+          $ref: '#/components/schemas/fielding_params'
+        free_hit:
+          type: boolean
+          xml:
+            attribute: true
+        id:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        inning:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        over_number:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        period_name:
+          type: string
+          xml:
+            attribute: true
+        period_number:
+          type: string
+          xml:
+            attribute: true
+        time:
+          type: string
+          xml:
+            attribute: true
+        type:
+          enum:
+          - match_started
+          - period_start
+          - boundary
+          - six
+          - wicket
+          - general
+          - weather
+          - toss
+          - power_play
+          - next_batsman_in
+          - change_of_bowler
+          - new_record
+          - milestone
+          - highlight
+          - chance_of_ball
+          - slow_over_rate
+          - penalty
+          - free_hit
+          - play_halted
+          - drinks
+          - lunch
+          - tea
+          - dinner
+          - time_out
+          - innings_break
+          - stumps
+          - close_of_play
+          - super_over
+          - rain_stoppage
+          - bad_light
+          - udrs
+          - significant_event
+          - pitchreport
+          - playerstowatch
+          - superover
+          type: string
+          xml:
+            attribute: true
+            name: EventTypeEnum
+        umpiring_params:
+          $ref: '#/components/schemas/umpiring_params'
+      required:
+      - id
+      - type
+      - time
+      type: object
+      xml:
+        name: event
+    tour:
+      additionalProperties: false
+      properties:
+        category:
+          $ref: '#/components/schemas/category'
+        id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        sport:
+          $ref: '#/components/schemas/sport'
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: tour
+    tournament:
+      additionalProperties: false
+      properties:
+        category:
+          $ref: '#/components/schemas/category'
+        current_season:
+          $ref: '#/components/schemas/current_season'
+        gender:
+          enum:
+          - men
+          - women
+          - mixed
+          type: string
+          xml:
+            attribute: true
+            name: EnumGender
+        id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        parent_id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        season_coverage_info:
+          $ref: '#/components/schemas/season_coverage_info'
+        sport:
+          $ref: '#/components/schemas/sport'
+        tour_id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        type:
+          enum:
+          - test
+          - odi
+          - t10
+          - t20i
+          - first_class
+          - list_a
+          - t20
+          type: string
+          xml:
+            attribute: true
+            name: CompetitionTypeEnum
+      required:
+      - id
+      - name
+      - sport
+      - category
+      type: object
+      xml:
+        name: tournament
+        x-sr-object-name: TournamentExtended
+    tournament_round:
+      additionalProperties: false
+      properties:
+        cup_round_match_number:
+          type: integer
+          xml:
+            attribute: true
+        cup_round_matches:
+          type: integer
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        number:
+          type: integer
+          xml:
+            attribute: true
+        other_match_id:
+          description: URN
+          type: string
+          xml:
+            attribute: true
+        phase:
+          type: string
+          xml:
+            attribute: true
+        type:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - type
+      type: object
+      xml:
+        name: tournament_round
+    umpiring_params:
+      properties:
+        ball_changed:
+          type: boolean
+          xml:
+            attribute: true
+        ball_changed_reason:
+          enum:
+          - discoloration
+          - new_ball
+          - out_of_shape
+          type: string
+          xml:
+            attribute: true
+            name: BallChangedReasonEnum
+        field_umpire:
+          $ref: '#/components/schemas/field_umpire'
+        referral_result:
+          enum:
+          - in_favor
+          - not_in_favor
+          type: string
+          xml:
+            attribute: true
+            name: ReferralResultEnum
+        third_umpire:
+          $ref: '#/components/schemas/third_umpire'
+      type: object
+      xml:
+        name: umpiring_params
+        x-sr-object-name: UmpiringParams
+    venue:
+      additionalProperties: false
+      properties:
+        bowling_ends:
+          items:
+            $ref: '#/components/schemas/bowling_end'
+          type: array
+          xml:
+            name: bowling_ends
+            wrapped: true
+            x-sr-object-name: BowlingEnds
+        capacity:
+          type: integer
+          xml:
+            attribute: true
+        city_name:
+          type: string
+          xml:
+            attribute: true
+        country_code:
+          description: ISO 3361-1 A3 Country Code
+          type: string
+          xml:
+            attribute: true
+        country_name:
+          type: string
+          xml:
+            attribute: true
+        id:
+          description: Venue URN (sr:venue:x)
+          type: string
+          xml:
+            attribute: true
+        map_coordinates:
+          type: string
+          xml:
+            attribute: true
+        name:
+          type: string
+          xml:
+            attribute: true
+        state:
+          type: string
+          xml:
+            attribute: true
+        timezone:
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      - name
+      type: object
+      xml:
+        name: venue
+    weather_info:
+      additionalProperties: false
+      properties:
+        rain_conditions:
+          enum:
+          - no_rain
+          - expected_soon
+          - showers
+          - rain
+          - heavy_rain
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: RainConditionsEnum
+        sky_conditions:
+          enum:
+          - clear
+          - partly_cloudy
+          - cloudy
+          - overcast
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: SkyConditionsEnum
+        temperature_range:
+          enum:
+          - very_hot
+          - hot
+          - warm
+          - mild
+          - cold
+          - very_cold
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: TemperatureRangeEnum
+        wind_conditions:
+          enum:
+          - no_wind
+          - breeze
+          - windy
+          - gale
+          - unknown
+          type: string
+          xml:
+            attribute: true
+            name: WindConditionsEnum
+      type: object
+      xml:
+        name: weather_info
+    wickets:
+      properties:
+        player:
+          $ref: '#/components/schemas/player'
+        rank:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+        team:
+          $ref: '#/components/schemas/team'
+        total:
+          format: integer
+          type: number
+          xml:
+            attribute: true
+      required:
+      - rank
+      - player
+      - total
+      type: object
+      xml:
+        name: wickets
+  responses:
+    match_lineups:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              lineups:
+                items:
+                  $ref: '#/components/schemas/lineup'
+                type: array
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              lineups:
+                items:
+                  $ref: '#/components/schemas/lineup'
+                type: array
+                xml:
+                  name: lineups
+                  wrapped: true
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+            type: object
+            xml:
+              name: match_lineups
+              x-sr-object-name: MatchLineupsEndpoint
+      description: OK
+    match_summary:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              coverage:
+                $ref: '#/components/schemas/coverage'
+              generated_at:
+                format: date-time
+                type: string
+              match_notes:
+                $ref: '#/components/schemas/match_notes'
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+              sport_event_conditions:
+                $ref: '#/components/schemas/sport_event_conditions'
+              sport_event_status:
+                $ref: '#/components/schemas/sport_event_status'
+              statistics:
+                $ref: '#/components/schemas/sport_event_statistics'
+              venue:
+                $ref: '#/components/schemas/venue'
+            required:
+            - generated_at
+            - sport_event
+            - sport_event_status
+            type: object
+            xml:
+              name: summary
+        application/xml:
+          schema:
+            additionalProperties: false
+            properties:
+              coverage:
+                $ref: '#/components/schemas/coverage'
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              match_notes:
+                $ref: '#/components/schemas/match_notes'
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+              sport_event_conditions:
+                $ref: '#/components/schemas/sport_event_conditions'
+              sport_event_status:
+                $ref: '#/components/schemas/sport_event_status'
+              statistics:
+                $ref: '#/components/schemas/sport_event_statistics'
+              venue:
+                $ref: '#/components/schemas/venue'
+            required:
+            - generated_at
+            - sport_event
+            - sport_event_status
+            type: object
+            xml:
+              name: match_summary
+              x-sr-object-name: SportEventSummaryEndpoint
+      description: OK
+    match_timeline:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              coverage:
+                $ref: '#/components/schemas/coverage'
+              generated_at:
+                format: date-time
+                type: string
+              match_notes:
+                $ref: '#/components/schemas/match_notes'
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+              sport_event_conditions:
+                $ref: '#/components/schemas/sport_event_conditions'
+              sport_event_status:
+                $ref: '#/components/schemas/sport_event_status'
+              statistics:
+                $ref: '#/components/schemas/sport_event_statistics'
+              timeline:
+                $ref: '#/components/schemas/timeline'
+              venue:
+                $ref: '#/components/schemas/venue'
+            required:
+            - generated_at
+            - sport_event
+            - sport_event_status
+            type: object
+            xml:
+              name: summary
+        application/xml:
+          schema:
+            additionalProperties: false
+            properties:
+              coverage:
+                $ref: '#/components/schemas/coverage'
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              match_notes:
+                $ref: '#/components/schemas/match_notes'
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+              sport_event_conditions:
+                $ref: '#/components/schemas/sport_event_conditions'
+              sport_event_status:
+                $ref: '#/components/schemas/sport_event_status'
+              statistics:
+                $ref: '#/components/schemas/sport_event_statistics'
+              timeline:
+                $ref: '#/components/schemas/timeline'
+              venue:
+                $ref: '#/components/schemas/venue'
+            required:
+            - generated_at
+            - sport_event
+            - sport_event_status
+            type: object
+            xml:
+              name: match_timeline
+              x-sr-object-name: MatchTimelineEndpoint
+      description: OK
+    match_timeline_delta:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              coverage:
+                $ref: '#/components/schemas/coverage'
+              generated_at:
+                format: date-time
+                type: string
+              match_notes:
+                $ref: '#/components/schemas/match_notes'
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+              sport_event_conditions:
+                $ref: '#/components/schemas/sport_event_conditions'
+              sport_event_status:
+                $ref: '#/components/schemas/sport_event_status'
+              statistics:
+                $ref: '#/components/schemas/sport_event_statistics'
+              timeline:
+                $ref: '#/components/schemas/timeline'
+              venue:
+                $ref: '#/components/schemas/venue'
+            required:
+            - generated_at
+            - sport_event
+            - sport_event_status
+            type: object
+            xml:
+              name: summary
+        application/xml:
+          schema:
+            additionalProperties: false
+            properties:
+              coverage:
+                $ref: '#/components/schemas/coverage'
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              match_notes:
+                $ref: '#/components/schemas/match_notes'
+              sport_event:
+                $ref: '#/components/schemas/sport_event'
+              sport_event_conditions:
+                $ref: '#/components/schemas/sport_event_conditions'
+              sport_event_status:
+                $ref: '#/components/schemas/sport_event_status'
+              statistics:
+                $ref: '#/components/schemas/sport_event_statistics'
+              timeline:
+                $ref: '#/components/schemas/timeline'
+              venue:
+                $ref: '#/components/schemas/venue'
+            required:
+            - generated_at
+            - sport_event
+            - sport_event_status
+            type: object
+            xml:
+              name: match_timeline_delta
+              x-sr-object-name: MatchTimelineDeltaEndpoint
+      description: OK
+    player_profile:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              player:
+                $ref: '#/components/schemas/player'
+              roles:
+                items:
+                  $ref: '#/components/schemas/role'
+                type: array
+              teams:
+                items:
+                  $ref: '#/components/schemas/team'
+                type: array
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              player:
+                $ref: '#/components/schemas/player'
+              roles:
+                items:
+                  $ref: '#/components/schemas/role'
+                type: array
+                xml:
+                  name: roles
+                  wrapped: true
+              teams:
+                items:
+                  $ref: '#/components/schemas/team'
+                type: array
+                xml:
+                  name: teams
+                  wrapped: true
+            type: object
+            xml:
+              name: player_profile
+              x-sr-object-name: PlayerProfileEndpoint
+      description: OK
+    results:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              results:
+                items:
+                  $ref: '#/components/schemas/result'
+                type: array
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              items:
+                $ref: '#/components/schemas/result'
+            type: object
+            xml:
+              name: results
+              wrapped: true
+              x-sr-object-name: ScheduleResultsEndpoint
+      description: OK
+    schedule_live_schedules:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              sport_events:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              schedule:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+                xml:
+                  name: sport_event
+            type: object
+            xml:
+              name: schedule
+              wrapped: true
+              x-sr-object-name: ScheduleLiveSchedulesEndpoint
+      description: OK
+    schedule_schedules:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              sport_events:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              items:
+                $ref: '#/components/schemas/sport_event'
+            type: object
+            xml:
+              name: schedule
+              wrapped: true
+              x-sr-object-name: ScheduleSchedulesEndpoint
+      description: OK
+    team_profile:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              manager:
+                $ref: '#/components/schemas/manager'
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              manager:
+                $ref: '#/components/schemas/manager'
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+            xml:
+              name: team_profile
+              wrapped: true
+              x-sr-object-name: TeamProfileEndpoint
+      description: OK
+    team_results:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              results:
+                items:
+                  $ref: '#/components/schemas/result'
+                type: array
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              results:
+                items:
+                  $ref: '#/components/schemas/result'
+                type: array
+                xml:
+                  name: results
+                  wrapped: true
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+            xml:
+              name: team_results
+              x-sr-object-name: TeamResults
+      description: OK
+    team_schedule:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              schedule:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              schedule:
+                properties:
+                  items:
+                    $ref: '#/components/schemas/sport_event'
+                type: object
+                xml:
+                  name: schedule
+                  wrapped: true
+                  x-sr-object-name: TeamSchedules
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+            xml:
+              name: team_schedule
+              x-sr-object-name: TeamScheduleEndpoint
+      description: OK
+    team_versus_matches:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              competitors:
+                items:
+                  $ref: '#/components/schemas/team'
+                type: array
+              generated_at:
+                format: date-time
+                type: string
+              last_meetings:
+                items:
+                  $ref: '#/components/schemas/result'
+                type: array
+              next_meetings:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+            type: object
+        application/xml:
+          schema:
+            properties:
+              competitors:
+                items:
+                  $ref: '#/components/schemas/team'
+                type: array
+                xml:
+                  name: competitors
+                  wrapped: true
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              last_meetings:
+                items:
+                  $ref: '#/components/schemas/result'
+                type: array
+                xml:
+                  name: last_meetings
+                  wrapped: true
+              next_meetings:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+                xml:
+                  name: next_meetings
+                  wrapped: true
+            type: object
+            xml:
+              name: team_versus_matches
+              x-sr-object-name: TeamVersusMatchesEndpoint
+      description: OK
+    tournament_info:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              groups:
+                items:
+                  $ref: '#/components/schemas/group'
+                type: array
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            required:
+            - tournament
+            - generated_at
+            - groups
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              groups:
+                items:
+                  $ref: '#/components/schemas/group'
+                type: array
+                xml:
+                  name: groups
+                  wrapped: true
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            required:
+            - tournament
+            - generated_at
+            - groups
+            type: object
+            xml:
+              name: tournament_info
+              x-sr-object-name: TournamentInfoEndpoint
+      description: OK
+    tournament_leaders:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              batting:
+                $ref: '#/components/schemas/batting'
+              bowling:
+                $ref: '#/components/schemas/bowling'
+              fielding:
+                $ref: '#/components/schemas/fielding'
+              generated_at:
+                format: date-time
+                type: string
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              batting:
+                $ref: '#/components/schemas/batting'
+              bowling:
+                $ref: '#/components/schemas/bowling'
+              fielding:
+                $ref: '#/components/schemas/fielding'
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+            xml:
+              name: tournament_leaders
+              x-sr-object-name: TournamentLeadersEndpoint
+      description: OK
+    tournament_results:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              results:
+                items:
+                  $ref: '#/components/schemas/result'
+                type: array
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              results:
+                items:
+                  $ref: '#/components/schemas/result'
+                type: array
+                xml:
+                  name: results
+                  wrapped: true
+                  x-sr-object-name: TournamentResultsEndpointResults
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+            xml:
+              name: tournament_results
+              x-sr-object-name: TournamentResultsEndpoint
+      description: OK
+    tournament_schedule:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              sport_events:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              sport_events:
+                items:
+                  $ref: '#/components/schemas/sport_event'
+                type: array
+                xml:
+                  name: sport_events
+                  wrapped: true
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+            xml:
+              name: tournament_schedule
+              x-sr-object-name: TournamentScheduleEndpoint
+      description: OK
+    tournament_seasons:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              seasons:
+                items:
+                  $ref: '#/components/schemas/season_extended'
+                type: array
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              seasons:
+                items:
+                  $ref: '#/components/schemas/season_extended'
+                type: array
+                xml:
+                  name: seasons
+                  wrapped: true
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+            xml:
+              name: tournament_seasons
+              x-sr-object-name: TournamentSeasonsEndpoint
+      description: OK
+    tournament_standings:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              standings:
+                items:
+                  $ref: '#/components/schemas/standing'
+                type: array
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              standings:
+                items:
+                  $ref: '#/components/schemas/standing'
+                type: array
+                xml:
+                  name: standings
+                  wrapped: true
+              tournament:
+                $ref: '#/components/schemas/tournament'
+            type: object
+            xml:
+              name: tournament_standings
+              x-sr-object-name: TournamentStandingsEndpoint
+      description: OK
+    tournament_team_squads:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              manager:
+                $ref: '#/components/schemas/manager'
+              players:
+                items:
+                  $ref: '#/components/schemas/player'
+                type: array
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              manager:
+                $ref: '#/components/schemas/manager'
+              players:
+                items:
+                  $ref: '#/components/schemas/player'
+                type: array
+                xml:
+                  name: players
+                  wrapped: true
+                  x-sr-object-name: TournamentSquadPlayers
+              team:
+                $ref: '#/components/schemas/team'
+            type: object
+            xml:
+              name: tournament_team_squads
+              x-sr-object-name: TournamentTeamSquadsEndpoint
+      description: OK
+    tournaments:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              tournaments:
+                items:
+                  $ref: '#/components/schemas/tournament'
+                type: array
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              items:
+                $ref: '#/components/schemas/tournament'
+            type: object
+            xml:
+              name: tournaments
+              wrapped: true
+              x-sr-object-name: TournamentsEndpoint
+      description: OK
+    tours:
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+              tours:
+                items:
+                  $ref: '#/components/schemas/tour'
+                type: array
+            type: object
+        application/xml:
+          schema:
+            properties:
+              generated_at:
+                format: date-time
+                type: string
+                xml:
+                  attribute: true
+              items:
+                $ref: '#/components/schemas/tour'
+            type: object
+            xml:
+              name: tours
+              wrapped: true
+              x-sr-object-name: ToursEndpoint
+      description: OK
+  parameters:
+    locale:
+      description: Locale used for translations
+      example: en
+      in: path
+      name: locale
+      required: true
+      schema:
+        enum:
+        - en
+        - aa
+        - aze
+        - bg
+        - br
+        - bs
+        - cs
+        - da
+        - de
+        - el
+        - es
+        - et
+        - fi
+        - fr
+        - heb
+        - hr
+        - hu
+        - id
+        - it
+        - ja
+        - ka
+        - ko
+        - lt
+        - lv
+        - me
+        - mk
+        - nl
+        - "no"
+        - pl
+        - pt
+        - ro
+        - ru
+        - se
+        - sk
+        - sl
+        - sqi
+        - sr
+        - srl
+        - th
+        - tr
+        - ukr
+        - vi
+        - zh
+        - zht
+        type: string
+    urn_competitor:
+      description: Competitor URN (sr:competitor:x)
+      example: sr:competitor:152326
+      in: path
+      name: urn_competitor
+      required: true
+      schema:
+        pattern: ^sr:competitor:\d+$
+        type: string
+    urn_competitor2:
+      description: Competitor 2 URN (sr:competitor:x)
+      example: sr:competitor:152330
+      in: path
+      name: urn_competitor2
+      required: true
+      schema:
+        pattern: ^sr:competitor:\d+$
+        type: string
+    urn_date:
+      description: Date (YYYY-MM-DD)
+      example: "2023-06-27"
+      in: path
+      name: urn_date
+      required: true
+      schema:
+        pattern: ^\d{4}-\d{2}-\d{2}$
+        type: string
+    urn_player:
+      description: Player URN (sr:player:x)
+      example: sr:player:672724
+      in: path
+      name: urn_player
+      required: true
+      schema:
+        pattern: ^sr:player:\d+$
+        type: string
+    urn_sport_event:
+      description: Sport Event URN (sr:sport_event:x)
+      example: sr:sport_event:39497515
+      in: path
+      name: urn_sport_event
+      required: true
+      schema:
+        pattern: ^sr:sport_event:\d+$
+        type: string
+    urn_tournament:
+      description: tournament URN (sr:tournament:x)
+      in: path
+      name: urn_tournament
+      required: true
+      schema:
+        pattern: ^sr:tournament:\d+$
+        type: string
+  securitySchemes:
+    ApiKeyAuth:
+      in: query
+      name: api_key
+      type: apiKey
+security:
+- ApiKeyAuth: []
+externalDocs:
+  description: Sportradar Developer Portal
+  url: https://developer.sportradar.com/docs/read/baseline_sports_coverage/Cricket_v2

@@ -1,0 +1,51 @@
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #ffffff;
+  gap: 0.5rem;
+}
+
+.logo:hover {
+  opacity: 0.9;
+}
+
+.logo-image {
+  object-fit: contain;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(45deg, #4a90e2, #357abd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Size variants */
+.logo-small .logo-image {
+  width: 24px;
+  height: 24px;
+}
+
+.logo-small .logo-text {
+  font-size: 1rem;
+}
+
+.logo-medium .logo-image {
+  width: 32px;
+  height: 32px;
+}
+
+.logo-medium .logo-text {
+  font-size: 1.25rem;
+}
+
+.logo-large .logo-image {
+  width: 48px;
+  height: 48px;
+}
+
+.logo-large .logo-text {
+  font-size: 1.5rem;
+}
