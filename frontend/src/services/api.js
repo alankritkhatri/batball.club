@@ -1,12 +1,22 @@
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
+const CRICBUZZ_API_URL = "https://cricbuzz-cricket.p.rapidapi.com/matches/v1";
 
-// Create axios instance
+// Create axios instance for main API
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
+  },
+});
+
+// Create axios instance for Cricbuzz API
+const cricbuzzApi = axios.create({
+  baseURL: CRICBUZZ_API_URL,
+  headers: {
+    "X-RapidAPI-Key": import.meta.env.VITE_RAPIDAPI_KEY,
+    "X-RapidAPI-Host": "cricbuzz-cricket.p.rapidapi.com",
   },
 });
 
@@ -32,6 +42,76 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Cricket matches API endpoints
+export const cricket = {
+  getMatches: async () => {
+    try {
+      const response = await cricbuzzApi.get("/list");
+      const matches = response.data;
+
+      // Filter for trophy tournaments and sort matches
+      const trophyMatches = matches.filter((match) =>
+        match.typeMatches.some((type) =>
+          type.seriesMatches.some((series) => {
+            const seriesName = series.seriesAdWrapper.seriesName.toLowerCase();
+            return (
+              seriesName.includes("trophy") ||
+              seriesName.includes("cup") ||
+              seriesName.includes("world cup") ||
+              seriesName.includes("championship") ||
+              seriesName.includes("icc")
+            );
+          })
+        )
+      );
+
+      // Separate matches by status
+      const liveMatches = [];
+      const upcomingMatches = [];
+      const completedMatches = [];
+
+      trophyMatches.forEach((match) => {
+        const status = match.matchInfo.status.toLowerCase();
+        if (status.includes("live")) {
+          liveMatches.push(match);
+        } else if (
+          status.includes("upcoming") ||
+          status.includes("scheduled")
+        ) {
+          upcomingMatches.push(match);
+        } else {
+          completedMatches.push(match);
+        }
+      });
+
+      return {
+        live: liveMatches,
+        upcoming: upcomingMatches,
+        completed: completedMatches,
+      };
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.message ||
+          "Failed to fetch cricket matches"
+      );
+    }
+  },
+
+  getMatchDetails: async (matchId) => {
+    try {
+      const response = await cricbuzzApi.get(`/match/${matchId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.message ||
+          "Failed to fetch match details"
+      );
+    }
+  },
+};
 
 export const auth = {
   login: async (email, password) => {

@@ -12,6 +12,7 @@ const Post = require("./models/Post");
 const ChatMessage = require("./models/ChatMessage");
 const http = require("http");
 const { Server } = require("socket.io");
+const cricketRoutes = require("./routes/cricket");
 require("dotenv").config();
 const asyncHandler = require("express-async-handler");
 
@@ -35,7 +36,7 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 5000;
-const API_KEY = process.env.CRICKET_DATA_API_KEY;
+const API_KEY = process.env.CRICBUZZ_API_KEY;
 const CRICKET_DATA_BASE_URL = "https://api.cricapi.com/v1";
 const CACHE_TTL = 30; // Cache for 30 seconds to keep live data fresh
 
@@ -126,6 +127,9 @@ app.use(cors(corsOptions));
 // Middleware
 app.use(express.json());
 
+// Cricket routes
+app.use("/api/cricket", cricketRoutes);
+
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -185,23 +189,72 @@ app.post("/api/auth/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    // Validate required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        error: "All fields are required",
+        details: {
+          username: !username ? "Username is required" : null,
+          email: !email ? "Email is required" : null,
+          password: !password ? "Password is required" : null,
+        },
+      });
+    }
+
     // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { username: username.toLowerCase() },
+      ],
+    });
+
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "Username or email already exists" });
+      return res.status(400).json({
+        error: "Account already exists",
+        details: {
+          email:
+            existingUser.email === email.toLowerCase()
+              ? "Email already in use"
+              : null,
+          username:
+            existingUser.username.toLowerCase() === username.toLowerCase()
+              ? "Username already taken"
+              : null,
+        },
+      });
     }
 
     // Create new user
-    const user = new User({ username, email, password });
-    await user.save();
+    const user = new User({
+      username,
+      email: email.toLowerCase(),
+      password,
+    });
+
+    try {
+      await user.save();
+    } catch (validationError) {
+      // Handle mongoose validation errors
+      if (validationError.name === "ValidationError") {
+        const errors = {};
+        for (let field in validationError.errors) {
+          errors[field] = validationError.errors[field].message;
+        }
+        return res.status(400).json({
+          error: "Validation failed",
+          details: errors,
+        });
+      }
+      throw validationError;
+    }
 
     // Generate token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
 
+    // Return success response
     res.status(201).json({
       user: {
         id: user._id,
@@ -211,7 +264,11 @@ app.post("/api/auth/register", async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Registration error:", error);
+    res.status(500).json({
+      error: "Server error during registration",
+      message: error.message,
+    });
   }
 });
 
