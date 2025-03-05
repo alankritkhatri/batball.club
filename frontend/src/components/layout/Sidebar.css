@@ -2,10 +2,13 @@
   background-color: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
+  margin-right: 15px;
   margin-bottom: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border-color);
-  width: 250px;
+  width: 230px;
+  height: auto;
+  min-height: 300px;
 }
 
 .section-title {
@@ -73,10 +76,45 @@
   text-align: center;
 }
 
+.create-post-sidebar-section {
+  margin-bottom: 1.5rem;
+}
+
+.create-post-sidebar-button {
+  width: 100%;
+  background-color: var(--accent-primary);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.create-post-sidebar-button:hover {
+  background-color: var(--accent-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-section {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-section:last-child {
+  margin-bottom: 0;
+}
+
 /* Responsive styles */
 @media (max-width: 1200px) {
   .sidebar {
-    width: 220px;
+    width: 200px;
     padding: 1.25rem;
   }
 }
@@ -85,7 +123,10 @@
   .sidebar {
     width: 100%;
     padding: 1rem;
-    margin-bottom: 0.75rem;
+    margin-right: 0;
+    margin-bottom: 15px;
+    height: auto;
+    max-height: none;
   }
 
   .thread-title {

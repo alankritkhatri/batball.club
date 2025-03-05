@@ -18,6 +18,9 @@ const API_KEY = process.env.CRICKET_DATA_API_KEY;
 const CRICKET_DATA_BASE_URL = "https://api.cricapi.com/v1";
 const CACHE_TTL = 30; // Cache for 30 seconds to keep live data fresh
 
+// Enable trust proxy - this is needed when behind a reverse proxy to correctly identify client IPs
+app.set("trust proxy", true);
+
 // Initialize cache
 const cache = new NodeCache({
   stdTTL: CACHE_TTL,

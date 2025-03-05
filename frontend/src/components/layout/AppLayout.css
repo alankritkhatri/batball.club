@@ -5,7 +5,7 @@
   background-color: #1a1f2c;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0;
+  padding: 15px; /* Add padding to the container to create space for floating sidebars */
   overflow-x: hidden;
 }
 
@@ -17,15 +17,18 @@
 }
 
 .right-sidebar {
-  width: 300px;
-  min-width: 300px; /* Ensures sidebar maintains width */
+  width: 280px; /* Reduced from 300px to account for margin */
+  min-width: 280px; /* Ensures sidebar maintains width */
   background-color: #232836;
   padding: 15px;
-  border-left: 1px solid #2d3446;
+  margin-left: 15px; /* Add margin to create floating effect */
+  border-radius: 12px; /* Add border radius for floating appearance */
   overflow-y: auto; /* This is the only scrollable container */
-  height: calc(100vh - 60px); /* Adjust based on your navbar height */
+  height: calc(100vh - 90px); /* Adjusted for margins */
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for floating effect */
+  border: 1px solid #2d3446;
 }
 
 .sidebar-section {
@@ -54,14 +57,15 @@
   }
 
   .right-sidebar {
-    width: 250px;
-    min-width: 250px;
+    width: 230px;
+    min-width: 230px;
   }
 }
 
 @media (max-width: 992px) {
   .main-container {
     flex-direction: column;
+    padding: 10px; /* Reduce padding on smaller screens */
   }
 
   .content-area {
@@ -70,19 +74,21 @@
   }
 
   .right-sidebar {
-    width: 400px;
+    width: 100%;
     min-width: 80%;
     height: auto;
     order: 3;
+    margin-left: 0; /* Remove left margin on smaller screens */
+    margin-top: 15px; /* Add top margin instead */
     border-left: none;
-    border-top: 1px solid #2d3446;
+    border-top: none;
     flex-direction: column;
     gap: 0;
     max-height: 70vh; /* Add a max height for mobile view */
   }
 
   .sidebar-section {
-    width: 80%;
+    width: 100%;
     margin-bottom: 25px;
   }
 }
