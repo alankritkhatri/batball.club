@@ -25,7 +25,9 @@ const auth = async (req, res, next) => {
         return res.status(401).json({ error: "User not found" });
       }
 
+      // Set user and user ID for easier access
       req.user = user;
+      req.user.id = user._id.toString(); // Ensure ID is available as a string
       req.token = token;
       next();
     } catch (jwtError) {

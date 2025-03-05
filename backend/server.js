@@ -267,6 +267,9 @@ app.get("/api/posts/:id", async (req, res) => {
       username: comment.user ? comment.user.username : comment.guestUsername,
     }));
 
+    // Ensure votes are included
+    transformedPost.votes = transformedPost.votes || 0;
+
     res.json(transformedPost);
   } catch (error) {
     res.status(400).json({ error: error.message });
