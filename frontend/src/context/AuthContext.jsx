@@ -18,11 +18,13 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && token) {
       try {
         const userData = JSON.parse(storedUser);
+        console.log("Initializing from localStorage:", { userData, token });
 
         // Normalize the user data to ensure _id exists
         const normalizedUserData = {
           ...userData,
           _id: userData._id || userData.id, // Use _id if it exists, otherwise use id
+          token: token, // Ensure token is included in user data
         };
 
         if (!normalizedUserData._id) {
@@ -40,6 +42,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
       }
+    } else {
+      console.log("No stored user data or token found");
     }
     setIsLoading(false);
   }, []);
@@ -60,14 +64,28 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    console.log("Logging in user:", normalizedUserData);
+    // Ensure token is included in userData or use the one from userData.token
+    const token = userData.token || "";
+
+    if (!token) {
+      console.error("No token provided during login");
+    }
+
+    console.log("Logging in user:", normalizedUserData, "with token:", token);
+
+    // Store token separately
+    localStorage.setItem("token", token);
+
+    // Store user data without token to avoid duplication
+    const userDataToStore = { ...normalizedUserData };
+    localStorage.setItem("user", JSON.stringify(userDataToStore));
+
     setUser(normalizedUserData);
     setIsAuthenticated(true);
-    localStorage.setItem("user", JSON.stringify(normalizedUserData));
-    localStorage.setItem("token", userData.token || "");
   };
 
   const logout = () => {
+    console.log("Logging out user");
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem("user");

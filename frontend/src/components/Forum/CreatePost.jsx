@@ -54,11 +54,23 @@ const CreatePost = ({ inline = false, onCancel }) => {
       setLoading(true);
       setError("");
 
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+
+      // Log token for debugging
+      console.log("Using token for post creation:", token);
+
+      if (!token) {
+        throw new Error(
+          "Authentication token is missing. Please log in again."
+        );
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           title: formData.title.trim(),
@@ -66,7 +78,13 @@ const CreatePost = ({ inline = false, onCancel }) => {
         }),
       });
 
+      // Log response status for debugging
+      console.log("Post creation response status:", response.status);
+
       const data = await response.json();
+
+      // Log response data for debugging
+      console.log("Post creation response data:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to create post");
@@ -78,6 +96,7 @@ const CreatePost = ({ inline = false, onCancel }) => {
         navigate(`/post/${data._id}`);
       }
     } catch (err) {
+      console.error("Error creating post:", err);
       setError(err.message);
     } finally {
       setLoading(false);

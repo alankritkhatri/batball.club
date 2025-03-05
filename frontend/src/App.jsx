@@ -9,6 +9,7 @@ import PostPage from "./pages/PostPage";
 import CreatePost from "./components/Forum/CreatePost";
 import ChampionsTrophyChat from "./pages/ChampionsTrophyChat";
 import { AuthProvider } from "./context/AuthContext";
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
               }
             />
           </Routes>
+          <Analytics />
         </div>
       </AuthProvider>
     </Router>

@@ -52,12 +52,21 @@ const MatchesSidebar = () => {
     }
   };
 
+  // Clear match data cache
+  const clearMatchDataCache = () => {
+    localStorage.removeItem("live_matches");
+    localStorage.removeItem("upcoming_matches");
+  };
+
   // Restore visible matches count from localStorage
   useEffect(() => {
     const savedVisibleMatches = localStorage.getItem("visible_matches_count");
     if (savedVisibleMatches) {
       setVisibleMatches(parseInt(savedVisibleMatches, 10));
     }
+
+    // Clear match data cache on page load to ensure fresh data
+    clearMatchDataCache();
   }, []);
 
   // Save visible matches count to localStorage when it changes
@@ -65,72 +74,105 @@ const MatchesSidebar = () => {
     localStorage.setItem("visible_matches_count", visibleMatches.toString());
   }, [visibleMatches]);
 
-  const fetchMatches = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchMatches = useCallback(
+    async (forceRefresh = false) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Check cache first
-      const cachedLiveMatches = getCachedData("live_matches");
-      const cachedUpcomingMatches = getCachedData("upcoming_matches");
+        let liveData, upcomingData;
 
-      let liveData, upcomingData;
+        // Check cache first (only if not forcing refresh)
+        const cachedLiveMatches = forceRefresh
+          ? null
+          : getCachedData("live_matches");
+        const cachedUpcomingMatches = forceRefresh
+          ? null
+          : getCachedData("upcoming_matches");
 
-      if (cachedLiveMatches && cachedUpcomingMatches) {
-        liveData = cachedLiveMatches;
-        upcomingData = cachedUpcomingMatches;
-      } else {
-        // Fetch live and upcoming matches
-        const [liveResponse, upcomingResponse] = await Promise.all([
-          fetch(`${API_CONFIG.BASE_URL}/api/matches/live`),
-          fetch(`${API_CONFIG.BASE_URL}/api/matches/upcoming`),
-        ]);
+        if (!forceRefresh && cachedLiveMatches && cachedUpcomingMatches) {
+          liveData = cachedLiveMatches;
+          upcomingData = cachedUpcomingMatches;
+        } else {
+          // Add a timestamp query parameter to force a fresh request instead of using cache-control header
+          const timestamp = Date.now();
 
-        if (!liveResponse.ok || !upcomingResponse.ok) {
-          throw new Error("Failed to fetch matches");
+          // Fetch live and upcoming matches
+          const [liveResponse, upcomingResponse] = await Promise.all([
+            fetch(
+              `${API_CONFIG.BASE_URL}/api/matches/live${
+                forceRefresh ? `?_t=${timestamp}` : ""
+              }`
+            ),
+            fetch(
+              `${API_CONFIG.BASE_URL}/api/matches/upcoming${
+                forceRefresh ? `?_t=${timestamp}` : ""
+              }`
+            ),
+          ]);
+
+          if (!liveResponse.ok || !upcomingResponse.ok) {
+            throw new Error("Failed to fetch matches");
+          }
+
+          liveData = await liveResponse.json();
+          upcomingData = await upcomingResponse.json();
+
+          // Cache the responses
+          setCachedData("live_matches", liveData);
+          setCachedData("upcoming_matches", upcomingData);
         }
 
-        liveData = await liveResponse.json();
-        upcomingData = await upcomingResponse.json();
+        // Combine and sort matches
+        const allMatches = [
+          ...liveData.data.map((match) => ({ ...match, isLive: true })),
+          ...upcomingData.data.map((match) => ({ ...match, isLive: false })),
+        ].sort((a, b) => new Date(a.dateTimeGMT) - new Date(b.dateTimeGMT));
 
-        // Cache the responses
-        setCachedData("live_matches", liveData);
-        setCachedData("upcoming_matches", upcomingData);
+        setMatches(allMatches);
+        setCanLoadMore(allMatches.length > visibleMatches);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching matches:", error);
+        setError(error.message);
+
+        // Implement retry logic
+        if (retryCount < MAX_RETRIES) {
+          setTimeout(() => {
+            setRetryCount((prev) => prev + 1);
+          }, 5000); // Retry after 5 seconds
+        }
+
+        setLoading(false);
       }
-
-      // Combine and sort matches
-      const allMatches = [
-        ...liveData.data.map((match) => ({ ...match, isLive: true })),
-        ...upcomingData.data.map((match) => ({ ...match, isLive: false })),
-      ].sort((a, b) => new Date(a.dateTimeGMT) - new Date(b.dateTimeGMT));
-
-      setMatches(allMatches);
-      setCanLoadMore(allMatches.length > visibleMatches);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching matches:", error);
-      setError(error.message);
-
-      // Implement retry logic
-      if (retryCount < MAX_RETRIES) {
-        setTimeout(() => {
-          setRetryCount((prev) => prev + 1);
-        }, 5000); // Retry after 5 seconds
-      }
-
-      setLoading(false);
-    }
-  }, [retryCount, visibleMatches]);
+    },
+    [retryCount, visibleMatches]
+  );
 
   useEffect(() => {
-    fetchMatches();
+    // Always fetch fresh data on initial load
+    fetchMatches(true);
 
     // Set up a refresh interval (every 5 minutes)
     const refreshInterval = setInterval(() => {
-      fetchMatches();
+      fetchMatches(true);
     }, API_CONFIG.CACHE_DURATION);
 
-    return () => clearInterval(refreshInterval);
+    // Add event listener for page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // Refresh data when page becomes visible again
+        fetchMatches(true);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Clean up
+    return () => {
+      clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [fetchMatches]);
 
   const loadMore = () => {
@@ -192,6 +234,13 @@ const MatchesSidebar = () => {
           Load More
         </button>
       )}
+      <button
+        className="refresh-btn"
+        onClick={() => fetchMatches(true)}
+        title="Refresh match scores"
+      >
+        Refresh Scores
+      </button>
     </div>
   );
 };

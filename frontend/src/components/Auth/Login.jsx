@@ -27,17 +27,41 @@ const Login = ({ onSuccess }) => {
     setIsLoading(true);
 
     try {
-      const { token, user } = await auth.login(
-        formData.email,
-        formData.password
-      );
+      // Log the login attempt for debugging
+      console.log("Attempting login with:", formData.email);
 
-      if (!token || !user) {
-        throw new Error("Invalid response from server");
+      const response = await auth.login(formData.email, formData.password);
+
+      // Log the response for debugging
+      console.log("Login response:", response);
+
+      const { token, user } = response;
+
+      if (!token) {
+        console.error("No token received from server");
+        throw new Error("No authentication token received from server");
       }
 
+      if (!user) {
+        console.error("No user data received from server");
+        throw new Error("No user data received from server");
+      }
+
+      // Store token in localStorage
       localStorage.setItem("token", token);
-      authLogin(user);
+
+      // Log token storage for debugging
+      console.log("Token stored in localStorage:", token);
+
+      // Create a complete user object with token
+      const userWithToken = {
+        ...user,
+        token: token,
+      };
+
+      // Pass the complete user object to authLogin
+      authLogin(userWithToken);
+
       if (onSuccess) {
         onSuccess();
       }

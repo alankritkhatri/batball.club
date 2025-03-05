@@ -49,6 +49,9 @@ const cache = new NodeCache({
   deleteOnExpire: true,
 });
 
+// Match data cache duration (30 seconds)
+const MATCH_CACHE_DURATION = 30;
+
 // Mock scores data store
 const mockScores = new Map();
 
@@ -113,9 +116,13 @@ app.use(limiter);
 
 // CORS Configuration
 const corsOptions = {
-  origin: true,
+  origin: [
+    "http://localhost:5173",
+    "https://batball.club",
+    "https://www.batball.club",
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -469,7 +476,12 @@ app.get(
   asyncHandler(async (req, res) => {
     try {
       const cacheKey = "live_matches";
-      const cachedData = cache.get(cacheKey);
+
+      // Check for timestamp query parameter to force refresh
+      const forceRefresh = req.query._t ? true : false;
+
+      // Get cached data if not forcing refresh
+      const cachedData = forceRefresh ? null : cache.get(cacheKey);
 
       if (cachedData) {
         return res.json(cachedData);
@@ -499,7 +511,7 @@ app.get(
           })),
       };
 
-      cache.set(cacheKey, transformedData, 30); // Cache for 30 seconds
+      cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
       res.json(transformedData);
     } catch (error) {
       console.error("Error fetching live matches:", error);
@@ -518,7 +530,12 @@ app.get(
   asyncHandler(async (req, res) => {
     try {
       const cacheKey = "upcoming_matches";
-      const cachedData = cache.get(cacheKey);
+
+      // Check for timestamp query parameter to force refresh
+      const forceRefresh = req.query._t ? true : false;
+
+      // Get cached data if not forcing refresh
+      const cachedData = forceRefresh ? null : cache.get(cacheKey);
 
       if (cachedData) {
         return res.json(cachedData);
@@ -540,11 +557,15 @@ app.get(
             date: match.date,
             dateTimeGMT: match.dateTimeGMT,
             teams: match.teams,
+            score: match.score || [],
             matchType: match.matchType,
+            tossWinner: match.tossWinner,
+            tossChoice: match.tossChoice,
+            matchWinner: match.matchWinner,
           })),
       };
 
-      cache.set(cacheKey, transformedData);
+      cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
       res.json(transformedData);
     } catch (error) {
       console.error("Error fetching upcoming matches:", error);
@@ -563,7 +584,12 @@ app.get(
   asyncHandler(async (req, res) => {
     try {
       const cacheKey = "current_matches";
-      const cachedData = cache.get(cacheKey);
+
+      // Check for cache-control header to force refresh
+      const forceRefresh = req.headers["cache-control"] === "no-cache";
+
+      // Get cached data if not forcing refresh
+      const cachedData = forceRefresh ? null : cache.get(cacheKey);
 
       if (cachedData) {
         return res.json(cachedData);
@@ -573,7 +599,7 @@ app.get(
       const data = await response.json();
       const transformedData = transformMatchData(data);
 
-      cache.set(cacheKey, transformedData);
+      cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
       res.json(transformedData);
     } catch (error) {
       console.error("Error fetching current matches:", error);
@@ -593,7 +619,12 @@ app.get(
     try {
       const { matchId } = req.params;
       const cacheKey = `match_${matchId}`;
-      const cachedData = cache.get(cacheKey);
+
+      // Check for timestamp query parameter to force refresh
+      const forceRefresh = req.query._t ? true : false;
+
+      // Get cached data if not forcing refresh
+      const cachedData = forceRefresh ? null : cache.get(cacheKey);
 
       if (cachedData) {
         return res.json(cachedData);
@@ -623,7 +654,7 @@ app.get(
         },
       };
 
-      cache.set(cacheKey, transformedData);
+      cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
       res.json(transformedData);
     } catch (error) {
       console.error(`Error fetching match ${req.params.matchId}:`, error);
