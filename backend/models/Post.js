@@ -48,6 +48,22 @@ const postSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  votes: {
+    type: Number,
+    default: 0,
+  },
+  upvotes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  downvotes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   comments: [commentSchema],
 });
 
