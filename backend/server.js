@@ -105,6 +105,7 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
+  trustProxy: false, // Disable trust proxy in rate limiter
 });
 
 // Apply rate limiting

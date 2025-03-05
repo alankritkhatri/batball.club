@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import "./ChampionsTrophyChat.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+console.log(API_BASE_URL);
 const CHAT_ROOM = "champions-trophy-finals";
 const LOCAL_STORAGE_KEY = "champions-trophy-chat-messages";
 

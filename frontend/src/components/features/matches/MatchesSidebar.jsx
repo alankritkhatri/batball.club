@@ -82,8 +82,8 @@ const MatchesSidebar = () => {
       } else {
         // Fetch live and upcoming matches
         const [liveResponse, upcomingResponse] = await Promise.all([
-          fetch(`${API_CONFIG.BASE_URL}/matches/live`),
-          fetch(`${API_CONFIG.BASE_URL}/matches/upcoming`),
+          fetch(`${API_CONFIG.BASE_URL}/api/matches/live`),
+          fetch(`${API_CONFIG.BASE_URL}/api/matches/upcoming`),
         ]);
 
         if (!liveResponse.ok || !upcomingResponse.ok) {
