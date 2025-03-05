@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
-const rateLimit = require("express-rate-limit");
 const NodeCache = require("node-cache");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
@@ -19,7 +18,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://batball.club",
+      "https://www.batball.club",
+      "http://batball.club",
+      "http://www.batball.club",
+      "www.batball.club",
+    ],
     methods: ["GET", "POST"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -41,8 +47,9 @@ const CRICBUZZ_BASE_URL = "https://cricbuzz-cricket.p.rapidapi.com";
 const CACHE_TTL = 30; // Cache for 30 seconds to keep live data fresh
 const MATCH_CACHE_DURATION = 30; // Cache matches for 30 seconds
 
-// Enable trust proxy - this is needed when behind a reverse proxy to correctly identify client IPs
-app.set("trust proxy", true);
+// Configure trust proxy with specific settings instead of a boolean
+// This helps prevent IP spoofing while still working behind a reverse proxy
+app.set("trust proxy", "loopback, linklocal, uniquelocal");
 
 // Initialize cache
 const cache = new NodeCache({
@@ -99,19 +106,6 @@ const generateMockScore = (matchId) => {
   }
   return mockScores.get(matchId);
 };
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 1000,
-  message: "Too many requests from this IP, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false,
-  trustProxy: false, // Disable trust proxy in rate limiter
-});
-
-// Apply rate limiting
-app.use(limiter);
 
 // CORS Configuration
 const corsOptions = {

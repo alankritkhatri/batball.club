@@ -8,6 +8,7 @@ import ForumPage from "./pages/ForumPage";
 import PostPage from "./pages/PostPage";
 import CreatePost from "./components/Forum/CreatePost";
 import ChampionsTrophyChat from "./pages/ChampionsTrophyChat";
+import LogsPage from "./pages/LogsPage";
 import { AuthProvider } from "./context/AuthContext";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -56,6 +57,9 @@ function App() {
             {/* Additional routes for direct post access */}
             <Route path="/post/:postId" element={<PostPage />} />
             <Route path="/create-post" element={<CreatePost />} />
+
+            {/* Logs route */}
+            <Route path="/logs" element={<LogsPage />} />
 
             {/* Catch-all route for 404 */}
             <Route
