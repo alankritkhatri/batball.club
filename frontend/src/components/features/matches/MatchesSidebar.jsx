@@ -4,7 +4,7 @@ import "./MatchesSidebar.css";
 
 // API configuration
 const API_CONFIG = {
-  BASE_URL: "http://localhost:5000/api",
+  BASE_URL: import.meta.env.VITE_API_URL,
   CACHE_DURATION: 300000, // 5 minutes in milliseconds
 };
 
