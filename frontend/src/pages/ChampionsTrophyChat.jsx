@@ -48,6 +48,13 @@ const ChampionsTrophyChat = () => {
   const maxConnectionAttempts = 3;
   const hasJoinedRoom = useRef(false); // Track if we've already joined the room
 
+  // Auto-show guest/login prompt when opening chat as non-authenticated user
+  useEffect(() => {
+    if (!isAuthenticated && !isGuest && !showGuestPrompt) {
+      setShowGuestPrompt(true);
+    }
+  }, [isAuthenticated, isGuest]);
+
   // Check for saved guest username in localStorage
   useEffect(() => {
     const savedGuestUsername = localStorage.getItem("guest_username");

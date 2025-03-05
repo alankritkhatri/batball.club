@@ -10,53 +10,83 @@ const Register = ({ onSuccess }) => {
     password: "",
     confirmPassword: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const { login: authLogin } = useAuth();
 
-  const validatePassword = (password) => {
-    if (password.length < 6) {
-      return "Password must be at least 6 characters long";
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Username validation
+    if (!formData.username.trim()) {
+      newErrors.username = "Username is required";
+    } else if (formData.username.length < 3) {
+      newErrors.username = "Username must be at least 3 characters long";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      newErrors.username =
+        "Username can only contain letters, numbers and underscores";
     }
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (
+      !/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(formData.email)
+    ) {
+      newErrors.email = "Please enter a valid email address";
     }
-    if (!/[a-z]/.test(password)) {
-      return "Password must contain at least one lowercase letter";
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters long";
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one uppercase letter";
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one lowercase letter";
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one number";
     }
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
+
+    // Confirm password validation
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
-    return null;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    // Clear error when user starts typing
-    if (error) setError("");
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: null,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+
+    // Clear all errors before validation
+    setErrors({});
+
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
-
-    // Validate password
-    const passwordError = validatePassword(formData.password);
-    if (passwordError) {
-      setError(passwordError);
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const { token, user } = await auth.register(
@@ -76,11 +106,18 @@ const Register = ({ onSuccess }) => {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      setError(
-        error.response?.data?.error ||
-          error.message ||
-          "An error occurred during registration"
-      );
+
+      // Handle structured error response
+      if (error.response?.data?.details) {
+        setErrors(error.response.data.details);
+      } else {
+        setErrors({
+          general:
+            error.response?.data?.error ||
+            error.message ||
+            "An error occurred during registration",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +127,9 @@ const Register = ({ onSuccess }) => {
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
         <h2>Register</h2>
-        {error && <div className="error-message">{error}</div>}
+        {errors.general && (
+          <div className="error-message">{errors.general}</div>
+        )}
         <div className="form-group">
           <label htmlFor="username">Username</label>
           <input
@@ -102,7 +141,11 @@ const Register = ({ onSuccess }) => {
             required
             disabled={isLoading}
             minLength={3}
+            className={errors.username ? "error" : ""}
           />
+          {errors.username && (
+            <div className="field-error">{errors.username}</div>
+          )}
         </div>
         <div className="form-group">
           <label htmlFor="email">Email</label>
@@ -114,7 +157,9 @@ const Register = ({ onSuccess }) => {
             onChange={handleChange}
             required
             disabled={isLoading}
+            className={errors.email ? "error" : ""}
           />
+          {errors.email && <div className="field-error">{errors.email}</div>}
         </div>
         <div className="form-group">
           <label htmlFor="password">Password</label>
@@ -127,7 +172,12 @@ const Register = ({ onSuccess }) => {
             required
             disabled={isLoading}
             minLength={6}
+            className={errors.password ? "error" : ""}
+            autoComplete="new-password"
           />
+          {errors.password && (
+            <div className="field-error">{errors.password}</div>
+          )}
           <small className="password-requirements">
             Password must be at least 6 characters long and contain uppercase,
             lowercase, and numbers
@@ -144,7 +194,12 @@ const Register = ({ onSuccess }) => {
             required
             disabled={isLoading}
             minLength={6}
+            className={errors.confirmPassword ? "error" : ""}
+            autoComplete="new-password"
           />
+          {errors.confirmPassword && (
+            <div className="field-error">{errors.confirmPassword}</div>
+          )}
         </div>
         <button type="submit" className="auth-button" disabled={isLoading}>
           {isLoading ? "Registering..." : "Register"}

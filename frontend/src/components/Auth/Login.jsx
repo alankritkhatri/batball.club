@@ -80,7 +80,8 @@ const Login = ({ onSuccess }) => {
             onChange={handleChange}
             required
             disabled={isLoading}
-            minLength={6}
+            className={error ? "error" : ""}
+            autoComplete="current-password"
           />
         </div>
         <button type="submit" className="auth-button" disabled={isLoading}>

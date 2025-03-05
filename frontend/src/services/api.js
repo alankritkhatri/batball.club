@@ -36,7 +36,7 @@ api.interceptors.response.use(
 export const auth = {
   login: async (email, password) => {
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post("/api/auth/login", { email, password });
       return response.data;
     } catch (error) {
       throw new Error(
@@ -46,7 +46,7 @@ export const auth = {
   },
   register: async (username, email, password) => {
     try {
-      const response = await api.post("/auth/register", {
+      const response = await api.post("/api/auth/register", {
         username,
         email,
         password,
@@ -63,7 +63,7 @@ export const auth = {
 export const posts = {
   getAll: async () => {
     try {
-      const response = await api.get("/posts");
+      const response = await api.get("/api/posts");
       return response.data;
     } catch (error) {
       throw new Error(
@@ -73,7 +73,7 @@ export const posts = {
   },
   create: async (postData) => {
     try {
-      const response = await api.post("/posts", postData);
+      const response = await api.post("/api/posts", postData);
       return response.data;
     } catch (error) {
       throw new Error(
@@ -83,7 +83,7 @@ export const posts = {
   },
   delete: async (postId) => {
     try {
-      const response = await api.delete(`/posts/${postId}`);
+      const response = await api.delete(`/api/posts/${postId}`);
       return response.data;
     } catch (error) {
       throw new Error(
