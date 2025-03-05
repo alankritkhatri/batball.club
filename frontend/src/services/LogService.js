@@ -5,26 +5,155 @@
 
 class LogService {
   constructor() {
-    // Try to load logs from sessionStorage
-    try {
-      const storedLogs = sessionStorage.getItem("console_logs");
-      this.logs = storedLogs ? JSON.parse(storedLogs) : [];
-      // eslint-disable-next-line no-unused-vars
-    } catch (error) {
-      this.logs = [];
-    }
-
-    this.listeners = [];
+    // Configuration
+    this.MAX_LOGS = 500; // Reduced from 1000 for mobile
+    this.STORAGE_KEY = "console_logs";
     this.isInitialized = false;
+    this.listeners = [];
+    this.logs = [];
+
+    // Check storage availability
+    this.storageAvailable = this.checkStorageAvailability();
+
+    // Try to load existing logs
+    if (this.storageAvailable) {
+      try {
+        const storedLogs = sessionStorage.getItem(this.STORAGE_KEY);
+        this.logs = storedLogs ? JSON.parse(storedLogs) : [];
+      } catch (error) {
+        console.warn("Failed to load stored logs:", error);
+        this.logs = [];
+      }
+    }
+  }
+
+  /**
+   * Check if storage is available and working
+   */
+  checkStorageAvailability() {
+    try {
+      const storage = window.sessionStorage;
+      const testKey = "__storage_test__";
+      storage.setItem(testKey, testKey);
+      storage.removeItem(testKey);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * Save logs with error handling and size management
+   */
+  saveToSessionStorage() {
+    if (!this.storageAvailable) return;
+
+    try {
+      // Keep only recent logs to manage storage size
+      const logsToStore = this.logs.slice(-this.MAX_LOGS);
+
+      // Estimate size before saving
+      const logsString = JSON.stringify(logsToStore);
+      if (logsString.length > 4.5 * 1024 * 1024) {
+        // 4.5MB limit to be safe
+        // If too large, remove older logs
+        this.logs = this.logs.slice(-Math.floor(this.MAX_LOGS / 2));
+        this.saveToSessionStorage(); // Try again with fewer logs
+        return;
+      }
+
+      sessionStorage.setItem(this.STORAGE_KEY, logsString);
+    } catch (error) {
+      if (
+        error.name === "QuotaExceededError" ||
+        error.name === "NS_ERROR_DOM_QUOTA_REACHED"
+      ) {
+        // If storage is full, remove half of the old logs
+        this.logs = this.logs.slice(-Math.floor(this.MAX_LOGS / 2));
+        this.saveToSessionStorage(); // Try again with fewer logs
+      } else {
+        console.warn("Failed to save logs:", error);
+      }
+    }
+  }
+
+  /**
+   * Format log content safely
+   */
+  formatLogContent(arg) {
+    try {
+      if (arg instanceof Error) {
+        return `Error Details:\n${JSON.stringify(
+          {
+            name: arg.name,
+            message: arg.message,
+            stack: arg.stack,
+            details: Object.getOwnPropertyNames(arg).reduce((acc, key) => {
+              if (!["name", "message", "stack"].includes(key)) {
+                try {
+                  acc[key] = arg[key];
+                } catch (e) {
+                  acc[key] = "[Unable to serialize property]";
+                }
+              }
+              return acc;
+            }, {}),
+          },
+          null,
+          2
+        )}`;
+      }
+
+      if (typeof arg === "object" && arg !== null) {
+        try {
+          return `Object Details:\n${JSON.stringify(
+            arg,
+            (key, value) => {
+              if (value instanceof Error) {
+                return `[Error: ${value.message}]`;
+              }
+              if (typeof value === "function") {
+                return "[Function]";
+              }
+              if (value instanceof HTMLElement) {
+                return `[HTMLElement: ${value.tagName}]`;
+              }
+              return value;
+            },
+            2
+          )}`;
+        } catch (e) {
+          return `[Complex Object: ${typeof arg}]`;
+        }
+      }
+
+      return String(arg);
+    } catch (e) {
+      return "[Failed to format log content]";
+    }
+  }
+
+  /**
+   * Create a log entry with safe formatting
+   */
+  createLogEntry(type, args) {
+    const timestamp = new Date().toISOString();
+    return {
+      type,
+      timestamp,
+      content: args.map((arg) => this.formatLogContent(arg)).join("\n"),
+      device: {
+        isMobile: /Mobile|Android|iPhone/i.test(navigator.userAgent),
+        userAgent: navigator.userAgent,
+      },
+    };
   }
 
   /**
    * Initialize the log service by overriding console methods
    */
   init() {
-    if (this.isInitialized) {
-      return;
-    }
+    if (this.isInitialized) return;
 
     // Store original console methods
     this.originalConsole = {
@@ -35,238 +164,43 @@ class LogService {
       debug: console.debug,
     };
 
-    // Override console.log
-    console.log = (...args) => {
-      const timestamp = new Date().toISOString();
-      const logEntry = {
-        type: "log",
-        timestamp,
-        content: args
-          .map((arg) => {
-            if (arg instanceof Error) {
-              return `Error Details:\n${JSON.stringify(
-                {
-                  name: arg.name,
-                  message: arg.message,
-                  stack: arg.stack,
-                  details: Object.getOwnPropertyNames(arg).reduce(
-                    (acc, key) => {
-                      if (!["name", "message", "stack"].includes(key)) {
-                        acc[key] = arg[key];
-                      }
-                      return acc;
-                    },
-                    {}
-                  ),
-                },
-                null,
-                2
-              )}`;
-            }
-            if (typeof arg === "object" && arg !== null) {
-              return `Object Details:\n${JSON.stringify(arg, null, 2)}`;
-            }
-            return String(arg);
-          })
-          .join("\n"),
-      };
-      this.logs.push(logEntry);
-      this.saveToSessionStorage();
-      this.notifyListeners();
-      this.originalConsole.log.apply(console, args);
-    };
+    // Override each console method
+    ["log", "error", "warn", "info", "debug"].forEach((method) => {
+      console[method] = (...args) => {
+        const logEntry = this.createLogEntry(method, args);
 
-    // Override console.error
-    console.error = (...args) => {
-      const timestamp = new Date().toISOString();
-      const logEntry = {
-        type: "error",
-        timestamp,
-        content: args
-          .map((arg) => {
-            if (arg instanceof Error) {
-              return `Error Details:\n${JSON.stringify(
-                {
-                  name: arg.name,
-                  message: arg.message,
-                  stack: arg.stack,
-                  details: Object.getOwnPropertyNames(arg).reduce(
-                    (acc, key) => {
-                      if (!["name", "message", "stack"].includes(key)) {
-                        acc[key] = arg[key];
-                      }
-                      return acc;
-                    },
-                    {}
-                  ),
-                },
-                null,
-                2
-              )}`;
-            }
-            if (typeof arg === "object" && arg !== null) {
-              return `Object Details:\n${JSON.stringify(arg, null, 2)}`;
-            }
-            return String(arg);
-          })
-          .join("\n"),
-      };
-      this.logs.push(logEntry);
-      this.saveToSessionStorage();
-      this.notifyListeners();
-      this.originalConsole.error.apply(console, args);
-    };
+        // Keep log count under control
+        if (this.logs.length >= this.MAX_LOGS) {
+          this.logs = this.logs.slice(-Math.floor(this.MAX_LOGS / 2));
+        }
 
-    // Override console.warn
-    console.warn = (...args) => {
-      const timestamp = new Date().toISOString();
-      const logEntry = {
-        type: "warn",
-        timestamp,
-        content: args
-          .map((arg) => {
-            if (arg instanceof Error) {
-              return `Error Details:\n${JSON.stringify(
-                {
-                  name: arg.name,
-                  message: arg.message,
-                  stack: arg.stack,
-                  details: Object.getOwnPropertyNames(arg).reduce(
-                    (acc, key) => {
-                      if (!["name", "message", "stack"].includes(key)) {
-                        acc[key] = arg[key];
-                      }
-                      return acc;
-                    },
-                    {}
-                  ),
-                },
-                null,
-                2
-              )}`;
-            }
-            if (typeof arg === "object" && arg !== null) {
-              return `Object Details:\n${JSON.stringify(arg, null, 2)}`;
-            }
-            return String(arg);
-          })
-          .join("\n"),
-      };
-      this.logs.push(logEntry);
-      this.saveToSessionStorage();
-      this.notifyListeners();
-      this.originalConsole.warn.apply(console, args);
-    };
+        this.logs.push(logEntry);
 
-    // Override console.info
-    console.info = (...args) => {
-      const timestamp = new Date().toISOString();
-      const logEntry = {
-        type: "info",
-        timestamp,
-        content: args
-          .map((arg) => {
-            if (arg instanceof Error) {
-              return `Error Details:\n${JSON.stringify(
-                {
-                  name: arg.name,
-                  message: arg.message,
-                  stack: arg.stack,
-                  details: Object.getOwnPropertyNames(arg).reduce(
-                    (acc, key) => {
-                      if (!["name", "message", "stack"].includes(key)) {
-                        acc[key] = arg[key];
-                      }
-                      return acc;
-                    },
-                    {}
-                  ),
-                },
-                null,
-                2
-              )}`;
-            }
-            if (typeof arg === "object" && arg !== null) {
-              return `Object Details:\n${JSON.stringify(arg, null, 2)}`;
-            }
-            return String(arg);
-          })
-          .join("\n"),
-      };
-      this.logs.push(logEntry);
-      this.saveToSessionStorage();
-      this.notifyListeners();
-      this.originalConsole.info.apply(console, args);
-    };
+        // Throttle storage saves on mobile
+        if (!this._saveTimeout) {
+          this._saveTimeout = setTimeout(() => {
+            this.saveToSessionStorage();
+            this._saveTimeout = null;
+          }, 1000);
+        }
 
-    // Override console.debug
-    console.debug = (...args) => {
-      const timestamp = new Date().toISOString();
-      const logEntry = {
-        type: "debug",
-        timestamp,
-        content: args
-          .map((arg) => {
-            if (arg instanceof Error) {
-              return `Error Details:\n${JSON.stringify(
-                {
-                  name: arg.name,
-                  message: arg.message,
-                  stack: arg.stack,
-                  details: Object.getOwnPropertyNames(arg).reduce(
-                    (acc, key) => {
-                      if (!["name", "message", "stack"].includes(key)) {
-                        acc[key] = arg[key];
-                      }
-                      return acc;
-                    },
-                    {}
-                  ),
-                },
-                null,
-                2
-              )}`;
-            }
-            if (typeof arg === "object" && arg !== null) {
-              return `Object Details:\n${JSON.stringify(arg, null, 2)}`;
-            }
-            return String(arg);
-          })
-          .join("\n"),
+        this.notifyListeners();
+        this.originalConsole[method].apply(console, args);
       };
-      this.logs.push(logEntry);
-      this.saveToSessionStorage();
-      this.notifyListeners();
-      this.originalConsole.debug.apply(console, args);
-    };
+    });
 
-    // Add event listener for beforeunload to capture logs until the very end of the session
+    // Add event listener for beforeunload
     window.addEventListener("beforeunload", () => {
-      this.saveToSessionStorage();
+      if (this._saveTimeout) {
+        clearTimeout(this._saveTimeout);
+        this.saveToSessionStorage();
+      }
     });
 
     this.isInitialized = true;
     this.originalConsole.log(
-      "LogService initialized and capturing all console output"
+      "LogService initialized - Mobile-friendly version"
     );
-  }
-
-  /**
-   * Save logs to sessionStorage
-   */
-  saveToSessionStorage() {
-    try {
-      // Limit the number of logs to prevent exceeding storage limits
-      const logsToStore = this.logs.slice(-1000); // Store last 1000 logs
-      sessionStorage.setItem("console_logs", JSON.stringify(logsToStore));
-    } catch (error) {
-      if (this.originalConsole) {
-        this.originalConsole.error(
-          "Error saving logs to sessionStorage:",
-          error
-        );
-      }
-    }
   }
 
   /**
