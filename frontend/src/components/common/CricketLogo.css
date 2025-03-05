@@ -1,0 +1,126 @@
+.cricket-logo {
+  display: inline-block;
+  position: relative;
+}
+
+.cricket-logo-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Size variants */
+.cricket-logo-small {
+  width: 24px;
+  height: 24px;
+}
+
+.cricket-logo-medium {
+  width: 32px;
+  height: 32px;
+}
+
+.cricket-logo-large {
+  width: 48px;
+  height: 48px;
+}
+
+/* Animation for the cricket bat */
+.cricket-bat {
+  transform-origin: 45px 25px;
+  animation: batSwing 5s ease-in-out infinite;
+}
+
+@keyframes batSwing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(15deg);
+  }
+  55% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Animation for the cricket ball */
+.cricket-ball {
+  animation: ballBounce 5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes ballBounce {
+  0%,
+  40%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-30px, 20px);
+  }
+  55% {
+    transform: translate(-40px, 30px);
+  }
+  60% {
+    transform: translate(-50px, 35px);
+  }
+  65% {
+    transform: translate(-60px, 30px);
+  }
+  70% {
+    transform: translate(-70px, 20px);
+  }
+  75% {
+    transform: translate(-80px, 0px);
+  }
+}
+
+/* Animation for the ball seam */
+.ball-seam {
+  animation: seamRotate 5s linear infinite;
+  transform-origin: 75px 40px;
+}
+
+@keyframes seamRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hover effect */
+.cricket-logo:hover .cricket-bat {
+  animation: batSwingFast 1s ease-in-out;
+}
+
+.cricket-logo:hover .cricket-ball {
+  animation: ballBounceFast 1s ease-in-out;
+}
+
+@keyframes batSwingFast {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(15deg);
+  }
+}
+
+@keyframes ballBounceFast {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-40px, 30px);
+  }
+}

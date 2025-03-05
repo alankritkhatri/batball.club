@@ -15,6 +15,7 @@ const MatchesSidebar = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [visibleMatches, setVisibleMatches] = useState(3);
   const [canLoadMore, setCanLoadMore] = useState(true);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const MAX_RETRIES = 3;
   const MATCHES_PER_LOAD = 3;
 
@@ -52,21 +53,12 @@ const MatchesSidebar = () => {
     }
   };
 
-  // Clear match data cache
-  const clearMatchDataCache = () => {
-    localStorage.removeItem("live_matches");
-    localStorage.removeItem("upcoming_matches");
-  };
-
   // Restore visible matches count from localStorage
   useEffect(() => {
     const savedVisibleMatches = localStorage.getItem("visible_matches_count");
     if (savedVisibleMatches) {
       setVisibleMatches(parseInt(savedVisibleMatches, 10));
     }
-
-    // Clear match data cache on page load to ensure fresh data
-    clearMatchDataCache();
   }, []);
 
   // Save visible matches count to localStorage when it changes
@@ -127,11 +119,24 @@ const MatchesSidebar = () => {
         const allMatches = [
           ...liveData.data.map((match) => ({ ...match, isLive: true })),
           ...upcomingData.data.map((match) => ({ ...match, isLive: false })),
-        ].sort((a, b) => new Date(a.dateTimeGMT) - new Date(b.dateTimeGMT));
+        ].sort((a, b) => {
+          // First prioritize Champions Trophy matches
+          const isAChampionsTrophy =
+            a.seriesName?.includes("Champions Trophy") || false;
+          const isBChampionsTrophy =
+            b.seriesName?.includes("Champions Trophy") || false;
+
+          if (isAChampionsTrophy && !isBChampionsTrophy) return -1;
+          if (!isAChampionsTrophy && isBChampionsTrophy) return 1;
+
+          // Then sort by date for matches of the same type
+          return new Date(a.dateTimeGMT) - new Date(b.dateTimeGMT);
+        });
 
         setMatches(allMatches);
         setCanLoadMore(allMatches.length > visibleMatches);
         setLoading(false);
+        setInitialLoadDone(true);
       } catch (error) {
         console.error("Error fetching matches:", error);
         setError(error.message);
@@ -150,30 +155,12 @@ const MatchesSidebar = () => {
   );
 
   useEffect(() => {
-    // Always fetch fresh data on initial load
-    fetchMatches(true);
-
-    // Set up a refresh interval (every 5 minutes)
-    const refreshInterval = setInterval(() => {
-      fetchMatches(true);
-    }, API_CONFIG.CACHE_DURATION);
-
-    // Add event listener for page visibility changes
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        // Refresh data when page becomes visible again
-        fetchMatches(true);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    // Clean up
-    return () => {
-      clearInterval(refreshInterval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [fetchMatches]);
+    // Only fetch on initial component mount if not already loaded
+    if (!initialLoadDone) {
+      fetchMatches(false);
+    }
+    // No automatic refresh intervals
+  }, [fetchMatches, initialLoadDone]);
 
   const loadMore = () => {
     setVisibleMatches((prev) => prev + MATCHES_PER_LOAD);
@@ -182,7 +169,7 @@ const MatchesSidebar = () => {
 
   const formatScore = (score) => {
     if (!score || !Array.isArray(score) || score.length === 0) return "";
-    return score.map((s) => `${s.inning}: ${s.r}/${s.w} (${s.o})`).join(" | ");
+    return score.map((s) => `${s.team}: ${s.inning}`).join(" | ");
   };
 
   if (loading) {
@@ -204,20 +191,44 @@ const MatchesSidebar = () => {
 
   return (
     <div className="matches-sidebar">
-      <h2>Live & Upcoming Matches</h2>
+      <div className="sidebar-header">
+        <h2>Live & Upcoming Matches</h2>
+        <button
+          className="refresh-btn-top"
+          onClick={() => fetchMatches(true)}
+          title="Refresh match scores"
+        >
+          Refresh Scores
+        </button>
+      </div>
       <div className="matches-list">
         {matches.slice(0, visibleMatches).map((match) => (
           <div
             key={match.id}
-            className={`match-card ${match.isLive ? "live" : ""}`}
+            className={`match-card ${match.isLive ? "live" : ""} ${
+              match.seriesName?.includes("Champions Trophy")
+                ? "champions-trophy"
+                : ""
+            }`}
           >
             <div className="match-header">
-              <span className={`match-type ${match.matchType?.toLowerCase()}`}>
-                {match.matchType}
-              </span>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {match.isLive && (
+                  <span className="match-status-indicator live"></span>
+                )}
+                {match.seriesName?.includes("Champions Trophy") && (
+                  <span className="match-status-indicator champions-trophy"></span>
+                )}
+                <span
+                  className={`match-type ${match.matchType?.toLowerCase()}`}
+                >
+                  {match.matchType}
+                </span>
+              </div>
               {match.isLive && <span className="live-indicator">LIVE</span>}
             </div>
             <h3>{match.name}</h3>
+            <div className="series-name">{match.seriesName}</div>
             <div className="match-venue">{match.venue}</div>
             <div className="match-time">
               {new Date(match.dateTimeGMT).toLocaleString()}
@@ -234,13 +245,6 @@ const MatchesSidebar = () => {
           Load More
         </button>
       )}
-      <button
-        className="refresh-btn"
-        onClick={() => fetchMatches(true)}
-        title="Refresh match scores"
-      >
-        Refresh Scores
-      </button>
     </div>
   );
 };

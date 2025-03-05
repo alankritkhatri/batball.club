@@ -1,94 +1,193 @@
 .main-container {
   display: flex;
   width: 100%;
-  min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
-  background-color: #1a1f2c;
+  min-height: calc(100vh - 80px); /* Adjusted for floating navbar */
+  background-color: #000000; /* Apple's dark background color */
   max-width: 1600px;
   margin: 0 auto;
-  padding: 15px; /* Add padding to the container to create space for floating sidebars */
+  padding: 30px; /* Increased padding for better spacing */
   overflow-x: hidden;
+  gap: 30px; /* Add gap between main elements */
 }
 
 .content-area {
   flex: 1;
-  padding: 20px;
+  padding: 28px;
   min-width: 0; /* Prevents flex items from overflowing */
   overflow-x: hidden;
+  background-color: rgba(55, 55, 58, 0.244);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .right-sidebar {
-  width: 280px; /* Reduced from 300px to account for margin */
-  min-width: 280px; /* Ensures sidebar maintains width */
-  background-color: #232836;
-  padding: 15px;
-  margin-left: 15px; /* Add margin to create floating effect */
-  border-radius: 12px; /* Add border radius for floating appearance */
-  overflow-y: auto; /* This is the only scrollable container */
-  height: calc(100vh - 90px); /* Adjusted for margins */
+  width: 350px;
+  min-width: 350px;
+  background-color: rgba(55, 55, 58, 0.244);
+  padding: 20px;
+  margin-left: 0; /* Removed margin since we're using gap */
+  overflow-y: visible;
+  height: auto;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for floating effect */
-  border: 1px solid #2d3446;
+  gap: 30px; /* Increased gap between sidebar sections */
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-section {
-  margin-bottom: 25px; /* Increased spacing between sections */
-  padding-bottom: 20px; /* Add padding at bottom */
-  border-bottom: 1px solid #2d3446; /* Add separator between sections */
-  overflow: visible; /* Prevent scrollbars on sections */
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  overflow: visible;
+  transition: all 0.3s ease;
+  background-color: transparent;
 }
 
-.sidebar-section:last-child {
-  border-bottom: none; /* Remove border from last section */
-  margin-bottom: 0; /* Remove margin from last section */
-  padding-bottom: 0; /* Remove padding from last section */
+.sidebar-section:hover {
+  transform: translateY(-5px);
 }
 
 /* Remove the flex ratio to keep it simple */
 .matches-section,
 .events-section {
   width: 100%;
-  overflow: visible; /* Prevent scrollbars on these sections */
+  overflow: visible;
 }
 
-@media (max-width: 1200px) {
+/* Large desktop screens */
+@media (min-width: 1601px) {
   .main-container {
-    max-width: 100%;
+    padding: 40px;
+    gap: 40px;
+  }
+
+  .content-area {
+    padding: 32px;
   }
 
   .right-sidebar {
-    width: 230px;
-    min-width: 230px;
+    width: 380px;
+    min-width: 380px;
   }
 }
 
+/* Desktop screens */
+@media (max-width: 1200px) {
+  .main-container {
+    max-width: 100%;
+    padding: 25px;
+    gap: 25px;
+  }
+
+  .right-sidebar {
+    width: 320px;
+    min-width: 320px;
+  }
+
+  .content-area {
+    padding: 24px;
+  }
+}
+
+/* Tablet screens */
 @media (max-width: 992px) {
   .main-container {
     flex-direction: column;
-    padding: 10px; /* Reduce padding on smaller screens */
+    padding: 20px;
+    gap: 20px;
   }
 
   .content-area {
     max-width: 100%;
     order: 1;
+    margin: 0;
+    border-radius: 16px;
+    padding: 20px;
   }
 
   .right-sidebar {
     width: 100%;
-    min-width: 80%;
+    min-width: 100%;
     height: auto;
     order: 3;
-    margin-left: 0; /* Remove left margin on smaller screens */
-    margin-top: 15px; /* Add top margin instead */
+    margin-left: 0;
+    margin-top: 0;
     border-left: none;
     border-top: none;
     flex-direction: column;
-    gap: 0;
-    max-height: 70vh; /* Add a max height for mobile view */
+    gap: 20px;
+    max-height: none;
+    background-color: rgba(55, 55, 58, 0.244);
+    border-radius: 16px;
   }
 
   .sidebar-section {
     width: 100%;
-    margin-bottom: 25px;
+    margin-bottom: 0;
+  }
+
+  .sidebar-section:hover {
+    transform: none;
+  }
+}
+
+/* Large mobile screens */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .content-area {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .right-sidebar {
+    padding: 16px;
+    gap: 16px;
+    border-radius: 14px;
+  }
+}
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+  .main-container {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .content-area {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .right-sidebar {
+    padding: 14px;
+    gap: 14px;
+    border-radius: 12px;
+  }
+}
+
+/* Extra small mobile screens */
+@media (max-width: 360px) {
+  .main-container {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .content-area {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .right-sidebar {
+    padding: 12px;
+    gap: 12px;
+    border-radius: 10px;
   }
 }

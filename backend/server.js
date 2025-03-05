@@ -35,9 +35,11 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 5000;
-const API_KEY = process.env.CRICKET_DATA_API_KEY;
-const CRICKET_DATA_BASE_URL = "https://api.cricapi.com/v1";
+const API_KEY = process.env.CRICBUZZ_API_KEY;
+const API_HOST = process.env.CRICBUZZ_API_HOST;
+const CRICBUZZ_BASE_URL = "https://cricbuzz-cricket.p.rapidapi.com";
 const CACHE_TTL = 30; // Cache for 30 seconds to keep live data fresh
+const MATCH_CACHE_DURATION = 30; // Cache matches for 30 seconds
 
 // Enable trust proxy - this is needed when behind a reverse proxy to correctly identify client IPs
 app.set("trust proxy", true);
@@ -48,9 +50,6 @@ const cache = new NodeCache({
   checkperiod: 2,
   deleteOnExpire: true,
 });
-
-// Match data cache duration (30 seconds)
-const MATCH_CACHE_DURATION = 30;
 
 // Mock scores data store
 const mockScores = new Map();
@@ -431,15 +430,17 @@ app.get(
   })
 );
 
-// Helper function to make API requests to Cricket Data API
-const fetchFromCricketData = async (endpoint, params = {}) => {
+// Helper function to make API requests to Cricbuzz API
+const fetchFromCricbuzz = async (endpoint, params = {}) => {
   try {
-    const queryParams = new URLSearchParams({
-      ...params,
-      apikey: API_KEY,
-    }).toString();
+    let url = `${CRICBUZZ_BASE_URL}${endpoint}`;
 
-    const url = `${CRICKET_DATA_BASE_URL}${endpoint}?${queryParams}`;
+    // Add query parameters if any
+    if (Object.keys(params).length > 0) {
+      const queryParams = new URLSearchParams(params).toString();
+      url = `${url}?${queryParams}`;
+    }
+
     console.log("Fetching from URL:", url);
 
     const controller = new AbortController();
@@ -447,6 +448,8 @@ const fetchFromCricketData = async (endpoint, params = {}) => {
 
     const response = await fetch(url, {
       headers: {
+        "X-RapidAPI-Key": API_KEY,
+        "X-RapidAPI-Host": API_HOST,
         Accept: "application/json",
       },
       signal: controller.signal,
@@ -456,9 +459,7 @@ const fetchFromCricketData = async (endpoint, params = {}) => {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(
-        `Cricket Data API error (${response.status}): ${errorBody}`
-      );
+      throw new Error(`Cricbuzz API error (${response.status}): ${errorBody}`);
     }
 
     return response;
@@ -487,28 +488,84 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData("/matches");
+      // First, get all matches
+      const response = await fetchFromCricbuzz("/matches/v1/live");
       const data = await response.json();
+
+      // Filter for ICC tournaments only
+      const iccMatches = data.typeMatches.flatMap((typeMatch) =>
+        typeMatch.seriesMatches
+          .filter(
+            (seriesMatch) =>
+              // Check if it's an ICC tournament (contains "ICC", "World Cup", "Champions Trophy", "T20 World Cup", etc.)
+              seriesMatch.seriesAdWrapper &&
+              (seriesMatch.seriesAdWrapper.seriesName.includes("ICC") ||
+                seriesMatch.seriesAdWrapper.seriesName.includes("World Cup") ||
+                seriesMatch.seriesAdWrapper.seriesName.includes(
+                  "Champions Trophy"
+                ) ||
+                seriesMatch.seriesAdWrapper.seriesName.includes("T20 World"))
+          )
+          .flatMap((seriesMatch) =>
+            seriesMatch.seriesAdWrapper.matches.map((match) => ({
+              id: match.matchInfo.matchId,
+              name: `${match.matchInfo.team1.teamName} vs ${match.matchInfo.team2.teamName}`,
+              seriesName: seriesMatch.seriesAdWrapper.seriesName,
+              status: match.matchInfo.status,
+              venue: match.matchInfo.venueInfo
+                ? match.matchInfo.venueInfo.ground
+                : "Unknown",
+              date: match.matchInfo.startDate,
+              dateTimeGMT: new Date(
+                parseInt(match.matchInfo.startDate)
+              ).toISOString(),
+              teams: [
+                match.matchInfo.team1.teamName,
+                match.matchInfo.team2.teamName,
+              ],
+              score: [
+                {
+                  team: match.matchInfo.team1.teamName,
+                  inning:
+                    match.matchScore && match.matchScore.team1Score
+                      ? `${match.matchScore.team1Score.inngs1.runs}/${match.matchScore.team1Score.inngs1.wickets}`
+                      : "Yet to bat",
+                },
+                {
+                  team: match.matchInfo.team2.teamName,
+                  inning:
+                    match.matchScore && match.matchScore.team2Score
+                      ? `${match.matchScore.team2Score.inngs1.runs}/${match.matchScore.team2Score.inngs1.wickets}`
+                      : "Yet to bat",
+                },
+              ],
+              matchType: match.matchInfo.matchFormat,
+              tossWinner: match.matchInfo.tossResults
+                ? match.matchInfo.tossResults.tossWinnerName
+                : null,
+              tossChoice: match.matchInfo.tossResults
+                ? match.matchInfo.tossResults.decision
+                : null,
+              matchWinner:
+                match.matchInfo.state === "Complete"
+                  ? match.matchInfo.status.includes(
+                      match.matchInfo.team1.teamName
+                    )
+                    ? match.matchInfo.team1.teamName
+                    : match.matchInfo.status.includes(
+                        match.matchInfo.team2.teamName
+                      )
+                    ? match.matchInfo.team2.teamName
+                    : null
+                  : null,
+            }))
+          )
+      );
 
       // Transform data to match our frontend expectations
       const transformedData = {
         status: "success",
-        data: data.data
-          .filter((match) => match.matchStarted && !match.matchEnded)
-          .map((match) => ({
-            id: match.id,
-            name: match.name,
-            status: match.status,
-            venue: match.venue,
-            date: match.date,
-            dateTimeGMT: match.dateTimeGMT,
-            teams: match.teams,
-            score: match.score || [],
-            matchType: match.matchType,
-            tossWinner: match.tossWinner,
-            tossChoice: match.tossChoice,
-            matchWinner: match.matchWinner,
-          })),
+        data: iccMatches,
       };
 
       cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
@@ -541,28 +598,54 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData("/matches");
+      // First, get all matches
+      const response = await fetchFromCricbuzz("/matches/v1/upcoming");
       const data = await response.json();
 
-      // Filter upcoming matches and transform data
+      // Filter for ICC tournaments only
+      const iccMatches = data.typeMatches.flatMap((typeMatch) =>
+        typeMatch.seriesMatches
+          .filter(
+            (seriesMatch) =>
+              // Check if it's an ICC tournament (contains "ICC", "World Cup", "Champions Trophy", "T20 World Cup", etc.)
+              seriesMatch.seriesAdWrapper &&
+              (seriesMatch.seriesAdWrapper.seriesName.includes("ICC") ||
+                seriesMatch.seriesAdWrapper.seriesName.includes("World Cup") ||
+                seriesMatch.seriesAdWrapper.seriesName.includes(
+                  "Champions Trophy"
+                ) ||
+                seriesMatch.seriesAdWrapper.seriesName.includes("T20 World"))
+          )
+          .flatMap((seriesMatch) =>
+            seriesMatch.seriesAdWrapper.matches.map((match) => ({
+              id: match.matchInfo.matchId,
+              name: `${match.matchInfo.team1.teamName} vs ${match.matchInfo.team2.teamName}`,
+              seriesName: seriesMatch.seriesAdWrapper.seriesName,
+              status: match.matchInfo.status,
+              venue: match.matchInfo.venueInfo
+                ? match.matchInfo.venueInfo.ground
+                : "Unknown",
+              date: match.matchInfo.startDate,
+              dateTimeGMT: new Date(
+                parseInt(match.matchInfo.startDate)
+              ).toISOString(),
+              teams: [
+                match.matchInfo.team1.teamName,
+                match.matchInfo.team2.teamName,
+              ],
+              score: [],
+              matchType: match.matchInfo.matchFormat,
+              tossWinner: null,
+              tossChoice: null,
+              matchWinner: null,
+            }))
+          )
+      );
+
+      // Transform data to match our frontend expectations
       const transformedData = {
         status: "success",
-        data: data.data
-          .filter((match) => !match.matchStarted)
-          .map((match) => ({
-            id: match.id,
-            name: match.name,
-            status: match.status,
-            venue: match.venue,
-            date: match.date,
-            dateTimeGMT: match.dateTimeGMT,
-            teams: match.teams,
-            score: match.score || [],
-            matchType: match.matchType,
-            tossWinner: match.tossWinner,
-            tossChoice: match.tossChoice,
-            matchWinner: match.matchWinner,
-          })),
+        data: iccMatches,
       };
 
       cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
@@ -595,9 +678,85 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData("/currentmatches");
+      // First, get all matches
+      const response = await fetchFromCricbuzz("/matches/v1/live");
       const data = await response.json();
-      const transformedData = transformMatchData(data);
+
+      // Filter for ICC tournaments only
+      const iccMatches = data.typeMatches.flatMap((typeMatch) =>
+        typeMatch.seriesMatches
+          .filter(
+            (seriesMatch) =>
+              // Check if it's an ICC tournament (contains "ICC", "World Cup", "Champions Trophy", "T20 World Cup", etc.)
+              seriesMatch.seriesAdWrapper &&
+              (seriesMatch.seriesAdWrapper.seriesName.includes("ICC") ||
+                seriesMatch.seriesAdWrapper.seriesName.includes("World Cup") ||
+                seriesMatch.seriesAdWrapper.seriesName.includes(
+                  "Champions Trophy"
+                ) ||
+                seriesMatch.seriesAdWrapper.seriesName.includes("T20 World"))
+          )
+          .flatMap((seriesMatch) =>
+            seriesMatch.seriesAdWrapper.matches.map((match) => ({
+              id: match.matchInfo.matchId,
+              name: `${match.matchInfo.team1.teamName} vs ${match.matchInfo.team2.teamName}`,
+              seriesName: seriesMatch.seriesAdWrapper.seriesName,
+              status: match.matchInfo.status,
+              venue: match.matchInfo.venueInfo
+                ? match.matchInfo.venueInfo.ground
+                : "Unknown",
+              date: match.matchInfo.startDate,
+              dateTimeGMT: new Date(
+                parseInt(match.matchInfo.startDate)
+              ).toISOString(),
+              teams: [
+                match.matchInfo.team1.teamName,
+                match.matchInfo.team2.teamName,
+              ],
+              score: [
+                {
+                  team: match.matchInfo.team1.teamName,
+                  inning:
+                    match.matchScore && match.matchScore.team1Score
+                      ? `${match.matchScore.team1Score.inngs1.runs}/${match.matchScore.team1Score.inngs1.wickets}`
+                      : "Yet to bat",
+                },
+                {
+                  team: match.matchInfo.team2.teamName,
+                  inning:
+                    match.matchScore && match.matchScore.team2Score
+                      ? `${match.matchScore.team2Score.inngs1.runs}/${match.matchScore.team2Score.inngs1.wickets}`
+                      : "Yet to bat",
+                },
+              ],
+              matchType: match.matchInfo.matchFormat,
+              tossWinner: match.matchInfo.tossResults
+                ? match.matchInfo.tossResults.tossWinnerName
+                : null,
+              tossChoice: match.matchInfo.tossResults
+                ? match.matchInfo.tossResults.decision
+                : null,
+              matchWinner:
+                match.matchInfo.state === "Complete"
+                  ? match.matchInfo.status.includes(
+                      match.matchInfo.team1.teamName
+                    )
+                    ? match.matchInfo.team1.teamName
+                    : match.matchInfo.status.includes(
+                        match.matchInfo.team2.teamName
+                      )
+                    ? match.matchInfo.team2.teamName
+                    : null
+                  : null,
+            }))
+          )
+      );
+
+      // Transform data to match our frontend expectations
+      const transformedData = {
+        status: "success",
+        data: iccMatches,
+      };
 
       cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
       res.json(transformedData);
@@ -630,34 +789,64 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData("/match_info", {
-        id: matchId,
-      });
+      // Get match info
+      const response = await fetchFromCricbuzz(`/mcenter/v1/${matchId}`);
       const data = await response.json();
 
       // Transform match data
       const transformedData = {
-        status: data.status,
+        status: "success",
         data: {
-          id: data.data.id,
-          name: data.data.name,
-          status: data.data.status,
-          venue: data.data.venue,
-          date: data.data.date,
-          dateTimeGMT: data.data.dateTimeGMT,
-          teams: data.data.teams,
-          score: data.data.score || [],
-          matchType: data.data.matchType,
-          tossWinner: data.data.tossWinner,
-          tossChoice: data.data.tossChoice,
-          matchWinner: data.data.matchWinner,
+          id: matchId,
+          name: `${data.matchInfo.team1.teamName} vs ${data.matchInfo.team2.teamName}`,
+          seriesName: data.matchInfo.seriesAdWrapper?.seriesName || "Unknown",
+          status: data.matchInfo.status,
+          venue: data.matchInfo.venueInfo
+            ? data.matchInfo.venueInfo.ground
+            : "Unknown",
+          date: data.matchInfo.startDate,
+          dateTimeGMT: new Date(
+            parseInt(data.matchInfo.startDate)
+          ).toISOString(),
+          teams: [data.matchInfo.team1.teamName, data.matchInfo.team2.teamName],
+          score: [
+            {
+              team: data.matchInfo.team1.teamName,
+              inning:
+                data.matchScore && data.matchScore.team1Score
+                  ? `${data.matchScore.team1Score.inngs1.runs}/${data.matchScore.team1Score.inngs1.wickets}`
+                  : "Yet to bat",
+            },
+            {
+              team: data.matchInfo.team2.teamName,
+              inning:
+                data.matchScore && data.matchScore.team2Score
+                  ? `${data.matchScore.team2Score.inngs1.runs}/${data.matchScore.team2Score.inngs1.wickets}`
+                  : "Yet to bat",
+            },
+          ],
+          matchType: data.matchInfo.matchFormat,
+          tossWinner: data.matchInfo.tossResults
+            ? data.matchInfo.tossResults.tossWinnerName
+            : null,
+          tossChoice: data.matchInfo.tossResults
+            ? data.matchInfo.tossResults.decision
+            : null,
+          matchWinner:
+            data.matchInfo.state === "Complete"
+              ? data.matchInfo.status.includes(data.matchInfo.team1.teamName)
+                ? data.matchInfo.team1.teamName
+                : data.matchInfo.status.includes(data.matchInfo.team2.teamName)
+                ? data.matchInfo.team2.teamName
+                : null
+              : null,
         },
       };
 
       cache.set(cacheKey, transformedData, MATCH_CACHE_DURATION); // Cache for 30 seconds
       res.json(transformedData);
     } catch (error) {
-      console.error(`Error fetching match ${req.params.matchId}:`, error);
+      console.error("Error fetching match details:", error);
       res.status(500).json({
         error: {
           message: "Failed to fetch match details",
@@ -679,7 +868,7 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData("/series");
+      const response = await fetchFromCricbuzz("/series");
       const data = await response.json();
       const transformedData = transformSeriesData(data);
 
@@ -709,7 +898,7 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData(`/series/${seriesId}`);
+      const response = await fetchFromCricbuzz(`/series/${seriesId}`);
       const data = await response.json();
 
       cache.set(cacheKey, data);
@@ -738,7 +927,7 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData(`/players/${playerId}`);
+      const response = await fetchFromCricbuzz(`/players/${playerId}`);
       const data = await response.json();
 
       cache.set(cacheKey, data);
@@ -767,7 +956,7 @@ app.get(
         return res.json(cachedData);
       }
 
-      const response = await fetchFromCricketData(`/stats/rankings/${type}`);
+      const response = await fetchFromCricbuzz(`/stats/rankings/${type}`);
       const data = await response.json();
 
       cache.set(cacheKey, data);

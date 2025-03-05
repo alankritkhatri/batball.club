@@ -1,25 +1,57 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", system-ui, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: rgba(255, 255, 255, 0.92);
+  background-color: #000000;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Apple-inspired dark mode CSS variables - refined for better contrast and readability */
+  --bg-primary: #000000;
+  --bg-secondary: rgba(28, 28, 30, 0.15);
+  --bg-tertiary: rgba(44, 44, 46, 0.15);
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --border-color: rgba(255, 255, 255, 0.18);
+  --accent-primary: #0a84ff;
+  --accent-secondary: #5ac8fa;
+  --accent-tertiary: #30d158; /* Apple green for success/positive actions */
+  --accent-quaternary: #ff9f0a; /* Apple orange for warnings/notifications */
+  --accent-danger: #ff453a; /* Apple red for destructive actions */
+  --shadow-color: rgba(0, 0, 0, 0.6);
+  --card-bg: rgba(44, 44, 46, 0.15);
+  --card-highlight: rgba(60, 60, 65, 0.15);
+
+  /* Button styles */
+  --button-primary-bg: var(--accent-primary);
+  --button-primary-text: #ffffff;
+  --button-secondary-bg: rgba(44, 44, 46, 0.15);
+  --button-secondary-text: var(--text-primary);
+  --button-success-bg: var(--accent-tertiary);
+  --button-success-text: #000000;
+  --button-warning-bg: var(--accent-quaternary);
+  --button-warning-text: #000000;
+  --button-danger-bg: var(--accent-danger);
+  --button-danger-text: #ffffff;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--accent-secondary);
+  text-decoration: none;
 }
 
 body {
@@ -29,29 +61,190 @@ body {
   width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 2.8em;
   line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 0.6em;
+}
+
+h2 {
+  font-size: 2em;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 0.6em;
+}
+
+h3 {
+  font-size: 1.5em;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin-bottom: 0.6em;
 }
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  border: none;
+  padding: 0.7em 1.4em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--button-primary-bg);
   cursor: pointer;
-  transition: border-color 0.25s;
-  color: rgba(255, 255, 255, 0.87);
+  transition: all 0.25s ease;
+  color: var(--button-primary-text);
 }
 button:hover {
-  border-color: #646cff;
+  background-color: var(--accent-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3);
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* Secondary button style */
+button.secondary {
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  border: 1px solid var(--border-color);
+}
+button.secondary:hover {
+  background-color: rgba(60, 60, 65, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Success button style */
+button.success {
+  background-color: var(--button-success-bg);
+  color: var(--button-success-text);
+}
+button.success:hover {
+  background-color: #40de68;
+  box-shadow: 0 2px 8px rgba(48, 209, 88, 0.3);
+}
+
+/* Warning button style */
+button.warning {
+  background-color: var(--button-warning-bg);
+  color: var(--button-warning-text);
+}
+button.warning:hover {
+  background-color: #ffb340;
+  box-shadow: 0 2px 8px rgba(255, 159, 10, 0.3);
+}
+
+/* Danger button style */
+button.danger {
+  background-color: var(--button-danger-bg);
+  color: var(--button-danger-text);
+}
+button.danger:hover {
+  background-color: #ff6961;
+  box-shadow: 0 2px 8px rgba(255, 69, 58, 0.3);
+}
+
+/* Responsive typography */
+@media (max-width: 1200px) {
+  h1 {
+    font-size: 2.5em;
+  }
+
+  h2 {
+    font-size: 1.8em;
+  }
+
+  h3 {
+    font-size: 1.4em;
+  }
+}
+
+@media (max-width: 992px) {
+  h1 {
+    font-size: 2.2em;
+  }
+
+  h2 {
+    font-size: 1.6em;
+  }
+
+  h3 {
+    font-size: 1.3em;
+  }
+
+  button {
+    padding: 0.6em 1.2em;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2em;
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  h3 {
+    font-size: 1.2em;
+    margin-bottom: 0.5em;
+  }
+
+  button {
+    padding: 0.6em 1.1em;
+    font-size: 0.95em;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.8em;
+  }
+
+  h2 {
+    font-size: 1.4em;
+  }
+
+  h3 {
+    font-size: 1.1em;
+  }
+
+  button {
+    padding: 0.5em 1em;
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 360px) {
+  h1 {
+    font-size: 1.6em;
+  }
+
+  h2 {
+    font-size: 1.3em;
+  }
+
+  h3 {
+    font-size: 1em;
+  }
+
+  button {
+    padding: 0.5em 0.9em;
+    font-size: 0.85em;
+  }
 }
