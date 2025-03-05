@@ -1,15 +1,15 @@
 .post-page {
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background-color: var(--bg-primary);
   padding: 2rem 1rem;
 }
 
 .post-page-container {
   max-width: 800px;
   margin: 0 auto;
-  background-color: white;
+  background-color: var(--bg-secondary);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   padding: 2rem;
 }
 
@@ -17,7 +17,7 @@
   text-align: center;
   padding: 2rem;
   font-size: 1.2rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
