@@ -5,7 +5,7 @@ import "./MatchesSidebar.css";
 // API configuration
 const API_CONFIG = {
   BASE_URL: "http://localhost:5000/api",
-  CACHE_DURATION: 30000, // 30 seconds in milliseconds
+  CACHE_DURATION: 300000, // 5 minutes in milliseconds
 };
 
 const MatchesSidebar = () => {
@@ -18,27 +18,52 @@ const MatchesSidebar = () => {
   const MAX_RETRIES = 3;
   const MATCHES_PER_LOAD = 3;
 
+  // Get cached data from localStorage
   const getCachedData = (key) => {
     const cached = localStorage.getItem(key);
     if (!cached) return null;
 
-    const { data, timestamp } = JSON.parse(cached);
-    if (Date.now() - timestamp > API_CONFIG.CACHE_DURATION) {
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp > API_CONFIG.CACHE_DURATION) {
+        localStorage.removeItem(key);
+        return null;
+      }
+      return data;
+    } catch (error) {
+      console.error("Error parsing cached data:", error);
       localStorage.removeItem(key);
       return null;
     }
-    return data;
   };
 
+  // Set data in localStorage cache
   const setCachedData = (key, data) => {
-    localStorage.setItem(
-      key,
-      JSON.stringify({
-        data,
-        timestamp: Date.now(),
-      })
-    );
+    try {
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          data,
+          timestamp: Date.now(),
+        })
+      );
+    } catch (error) {
+      console.error("Error caching data:", error);
+    }
   };
+
+  // Restore visible matches count from localStorage
+  useEffect(() => {
+    const savedVisibleMatches = localStorage.getItem("visible_matches_count");
+    if (savedVisibleMatches) {
+      setVisibleMatches(parseInt(savedVisibleMatches, 10));
+    }
+  }, []);
+
+  // Save visible matches count to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("visible_matches_count", visibleMatches.toString());
+  }, [visibleMatches]);
 
   const fetchMatches = useCallback(async () => {
     try {
@@ -99,6 +124,13 @@ const MatchesSidebar = () => {
 
   useEffect(() => {
     fetchMatches();
+
+    // Set up a refresh interval (every 5 minutes)
+    const refreshInterval = setInterval(() => {
+      fetchMatches();
+    }, API_CONFIG.CACHE_DURATION);
+
+    return () => clearInterval(refreshInterval);
   }, [fetchMatches]);
 
   const loadMore = () => {

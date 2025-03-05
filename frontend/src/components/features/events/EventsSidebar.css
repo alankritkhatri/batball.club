@@ -6,6 +6,7 @@
   margin-top: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border-color);
+  overflow-y: visible;
 }
 
 .events-sidebar h2 {
@@ -75,4 +76,13 @@
 .event-venue {
   color: var(--text-secondary);
   font-size: 0.85rem;
+}
+
+@media (max-width: 992px) {
+  .events-sidebar {
+    width: 100%;
+    max-height: none;
+    flex: 1;
+    margin-top: 0;
+  }
 }

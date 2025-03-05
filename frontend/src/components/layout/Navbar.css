@@ -176,3 +176,146 @@
 .logout-btn:hover {
   background-color: var(--accent-secondary);
 }
+
+/* Hamburger Menu */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 3px;
+  background-color: var(--text-primary);
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.hamburger-line.active:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger-line.active:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line.active:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+  .search-bar input {
+    width: 250px;
+  }
+}
+
+@media (max-width: 992px) {
+  .search-bar input {
+    width: 200px;
+  }
+
+  .nav-center {
+    gap: 1.5rem;
+  }
+
+  .nav-right {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.5rem;
+  }
+
+  .hamburger-menu {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .search-bar {
+    display: none;
+  }
+
+  .nav-center,
+  .nav-right {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .nav-center.mobile-open,
+  .nav-right.mobile-open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-center {
+    top: 60px;
+  }
+
+  .nav-right {
+    top: calc(60px + 5 * 48px); /* Navbar height + 5 nav items */
+  }
+
+  .nav-item {
+    width: 100%;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1rem;
+  }
+
+  .toggle-group {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+  }
+
+  .user-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .login-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.5rem 0.75rem;
+    height: 50px;
+  }
+
+  .nav-center {
+    top: 50px;
+  }
+
+  .nav-right {
+    top: calc(50px + 5 * 48px);
+  }
+
+  .logo-placeholder {
+    width: 24px;
+    height: 24px;
+  }
+}

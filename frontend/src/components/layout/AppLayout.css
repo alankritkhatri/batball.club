@@ -1,0 +1,88 @@
+.main-container {
+  display: flex;
+  width: 100%;
+  min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
+  background-color: #1a1f2c;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.content-area {
+  flex: 1;
+  padding: 20px;
+  min-width: 0; /* Prevents flex items from overflowing */
+  overflow-x: hidden;
+}
+
+.right-sidebar {
+  width: 300px;
+  min-width: 300px; /* Ensures sidebar maintains width */
+  background-color: #232836;
+  padding: 15px;
+  border-left: 1px solid #2d3446;
+  overflow-y: auto; /* This is the only scrollable container */
+  height: calc(100vh - 60px); /* Adjust based on your navbar height */
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section {
+  margin-bottom: 25px; /* Increased spacing between sections */
+  padding-bottom: 20px; /* Add padding at bottom */
+  border-bottom: 1px solid #2d3446; /* Add separator between sections */
+  overflow: visible; /* Prevent scrollbars on sections */
+}
+
+.sidebar-section:last-child {
+  border-bottom: none; /* Remove border from last section */
+  margin-bottom: 0; /* Remove margin from last section */
+  padding-bottom: 0; /* Remove padding from last section */
+}
+
+/* Remove the flex ratio to keep it simple */
+.matches-section,
+.events-section {
+  width: 100%;
+  overflow: visible; /* Prevent scrollbars on these sections */
+}
+
+@media (max-width: 1200px) {
+  .main-container {
+    max-width: 100%;
+  }
+
+  .right-sidebar {
+    width: 250px;
+    min-width: 250px;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .content-area {
+    max-width: 100%;
+    order: 1;
+  }
+
+  .right-sidebar {
+    width: 400px;
+    min-width: 80%;
+    height: auto;
+    order: 3;
+    border-left: none;
+    border-top: 1px solid #2d3446;
+    flex-direction: column;
+    gap: 0;
+    max-height: 70vh; /* Add a max height for mobile view */
+  }
+
+  .sidebar-section {
+    width: 80%;
+    margin-bottom: 25px;
+  }
+}

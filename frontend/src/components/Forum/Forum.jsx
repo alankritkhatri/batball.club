@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import AuthModal from "../Auth/AuthModal";
+import CreatePost from "./CreatePost";
 import "./Forum.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const Forum = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -48,7 +49,7 @@ const Forum = () => {
 
   const handleCreatePostClick = () => {
     if (user) {
-      navigate("/create-post");
+      setShowCreatePost(true);
     } else {
       setShowAuthModal(true);
     }
@@ -56,7 +57,11 @@ const Forum = () => {
 
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
-    navigate("/create-post");
+    setShowCreatePost(true);
+  };
+
+  const handleCancelCreate = () => {
+    setShowCreatePost(false);
   };
 
   if (loading) {
@@ -74,66 +79,57 @@ const Forum = () => {
     );
   }
 
-  if (posts.length === 0) {
-    return (
-      <div className="forum-container">
-        <div className="forum-header">
-          <h1>Forum</h1>
+  return (
+    <div className="forum-container">
+      <div className="forum-header">
+        <h1>Forum</h1>
+        {!showCreatePost && (
           <button
             onClick={handleCreatePostClick}
             className="create-post-button"
           >
             Create New Post
           </button>
-        </div>
+        )}
+      </div>
+
+      {showCreatePost && (
+        <CreatePost inline={true} onCancel={handleCancelCreate} />
+      )}
+
+      {posts.length === 0 && !showCreatePost ? (
         <div className="no-posts">
           No posts available. Be the first to create one!
         </div>
-        {showAuthModal && (
-          <AuthModal
-            onClose={() => setShowAuthModal(false)}
-            onSuccess={handleAuthSuccess}
-            message="Please log in or register to create a new post."
-          />
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="forum-container">
-      <div className="forum-header">
-        <h1>Forum</h1>
-        <button onClick={handleCreatePostClick} className="create-post-button">
-          Create New Post
-        </button>
-      </div>
-      <div className="posts-list">
-        {posts.map((post) => (
-          <article key={post._id} className="forum-post">
-            <Link to={`/post/${post._id}`} className="post-title-link">
-              <h2>{post.title}</h2>
-            </Link>
-            <div className="post-meta">
-              <span className="post-author">{post.author.username}</span>
-              <span className="post-date">{formatDate(post.createdAt)}</span>
-            </div>
-            <p className="post-content-preview">
-              {post.content.length > 200
-                ? `${post.content.substring(0, 200)}...`
-                : post.content}
-            </p>
-            <div className="post-footer">
-              <div className="post-stats">
-                {post.comments?.length || 0} comments
-              </div>
-              <Link to={`/post/${post._id}`} className="read-more-button">
-                Read More
+      ) : (
+        <div className="posts-list">
+          {posts.map((post) => (
+            <article key={post._id} className="forum-post">
+              <Link to={`/post/${post._id}`} className="post-title-link">
+                <h2>{post.title}</h2>
               </Link>
-            </div>
-          </article>
-        ))}
-      </div>
+              <div className="post-meta">
+                <span className="post-author">{post.author.username}</span>
+                <span className="post-date">{formatDate(post.createdAt)}</span>
+              </div>
+              <p className="post-content-preview">
+                {post.content.length > 200
+                  ? `${post.content.substring(0, 200)}...`
+                  : post.content}
+              </p>
+              <div className="post-footer">
+                <div className="post-stats">
+                  {post.comments?.length || 0} comments
+                </div>
+                <Link to={`/post/${post._id}`} className="read-more-button">
+                  Read More
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
       {showAuthModal && (
         <AuthModal
           onClose={() => setShowAuthModal(false)}

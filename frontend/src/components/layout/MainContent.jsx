@@ -82,19 +82,18 @@ const MainContent = () => {
 
   const groupedNews = groupNewsByDate();
 
+  const handleCreatePost = () => {
+    if (!user) {
+      openLoginModal("Please log in or register to create a new post");
+    } else {
+      navigate("/create-post");
+    }
+  };
+
   return (
     <div className="main-content">
       <div className="create-post-section">
-        <button
-          className="create-post-button"
-          onClick={() => {
-            if (!user) {
-              openLoginModal("Please log in to create a new post");
-            } else {
-              navigate("/create-post");
-            }
-          }}
-        >
+        <button className="create-post-button" onClick={handleCreatePost}>
           Create New Post
         </button>
       </div>

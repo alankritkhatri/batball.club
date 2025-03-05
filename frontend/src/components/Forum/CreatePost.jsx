@@ -3,10 +3,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import AuthModal from "../Auth/AuthModal";
 import "./Forum.css";
+import AppLayout from "../layout/AppLayout";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-const CreatePost = () => {
+// Modular CreatePost component without white background
+const CreatePost = ({ inline = false, onCancel }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -70,7 +72,11 @@ const CreatePost = () => {
         throw new Error(data.error || "Failed to create post");
       }
 
-      navigate(`/post/${data._id}`);
+      if (inline) {
+        if (onCancel) onCancel();
+      } else {
+        navigate(`/post/${data._id}`);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -83,7 +89,11 @@ const CreatePost = () => {
   };
 
   const handleAuthClose = () => {
-    navigate("/forum");
+    if (inline) {
+      if (onCancel) onCancel();
+    } else {
+      navigate("/forum");
+    }
   };
 
   // Show auth modal for logged out users
@@ -97,55 +107,104 @@ const CreatePost = () => {
     );
   }
 
+  const formContent = (
+    <>
+      {error && <div className="error-message">{error}</div>}
+      <form onSubmit={handleSubmit} className="post-form">
+        <div className="form-group">
+          <label htmlFor="title">Title</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            placeholder="Enter a descriptive title"
+            className="post-input"
+            disabled={loading}
+            maxLength={200}
+          />
+          <small className="char-count">{formData.title.length}/200</small>
+        </div>
+        <div className="form-group">
+          <label htmlFor="content">Content</label>
+          <textarea
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            required
+            placeholder="Write your post content here..."
+            className="post-textarea"
+            rows="12"
+            disabled={loading}
+            maxLength={10000}
+          />
+          <small className="char-count">{formData.content.length}/10000</small>
+        </div>
+        <div className="form-actions">
+          {inline ? (
+            <button type="button" className="cancel-button" onClick={onCancel}>
+              Cancel
+            </button>
+          ) : (
+            <Link to="/forum" className="cancel-button">
+              Cancel
+            </Link>
+          )}
+          <button type="submit" className="submit-button" disabled={loading}>
+            {loading ? (
+              <span className="loading-spinner">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="spinner"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                Creating...
+              </span>
+            ) : (
+              "Create Post"
+            )}
+          </button>
+        </div>
+      </form>
+    </>
+  );
+
+  // If this is an inline component (used within another page), don't wrap with AppLayout
+  if (inline) {
+    return (
+      <div className="create-post-container">
+        <h2>Create New Post</h2>
+        {formContent}
+      </div>
+    );
+  }
+
+  // For standalone page, wrap with AppLayout
   return (
-    <div className="post-page">
-      <div className="post-page-container">
+    <AppLayout>
+      <div className="create-post-container">
         <div className="post-navigation">
           <Link to="/forum" className="back-to-forum">
             ← Back to Forum
           </Link>
         </div>
-        <div className="create-post">
-          <h1>Create New Post</h1>
-          {error && <div className="error-message">{error}</div>}
-          <form onSubmit={handleSubmit} className="post-form">
-            <div className="form-group">
-              <label htmlFor="title">Title</label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-                placeholder="Enter a descriptive title"
-                className="post-input"
-                disabled={loading}
-                maxLength={200}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="content">Content</label>
-              <textarea
-                id="content"
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                required
-                placeholder="Write your post content here..."
-                className="post-textarea"
-                rows="15"
-                disabled={loading}
-                maxLength={10000}
-              />
-            </div>
-            <button type="submit" className="submit-button" disabled={loading}>
-              {loading ? "Creating..." : "Create Post"}
-            </button>
-          </form>
-        </div>
+        <h2>Create New Post</h2>
+        {formContent}
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

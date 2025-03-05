@@ -2,10 +2,8 @@ import "./App.css";
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
-import Sidebar from "./components/layout/Sidebar";
 import MainContent from "./components/layout/MainContent";
-import MatchesSidebar from "./components/features/matches/MatchesSidebar";
-import EventsSidebar from "./components/features/events/EventsSidebar";
+import AppLayout from "./components/layout/AppLayout";
 import ForumPage from "./pages/ForumPage";
 import PostPage from "./pages/PostPage";
 import CreatePost from "./components/Forum/CreatePost";
@@ -22,14 +20,9 @@ function App() {
             <Route
               path="/"
               element={
-                <div className="main-container">
-                  <Sidebar />
+                <AppLayout>
                   <MainContent />
-                  <div className="right-sidebar">
-                    <MatchesSidebar />
-                    <EventsSidebar />
-                  </div>
-                </div>
+                </AppLayout>
               }
             />
 
@@ -37,27 +30,17 @@ function App() {
             <Route
               path="/matches"
               element={
-                <div className="main-container">
-                  <Sidebar />
+                <AppLayout>
                   <MainContent />
-                  <div className="right-sidebar">
-                    <MatchesSidebar />
-                    <EventsSidebar />
-                  </div>
-                </div>
+                </AppLayout>
               }
             />
             <Route
               path="/matches/:matchId"
               element={
-                <div className="main-container">
-                  <Sidebar />
+                <AppLayout>
                   <MainContent />
-                  <div className="right-sidebar">
-                    <MatchesSidebar />
-                    <EventsSidebar />
-                  </div>
-                </div>
+                </AppLayout>
               }
             />
 
@@ -73,9 +56,12 @@ function App() {
             <Route
               path="*"
               element={
-                <div className="main-container">
-                  <h1>404 - Page Not Found</h1>
-                </div>
+                <AppLayout>
+                  <div className="not-found">
+                    <h1>404 - Page Not Found</h1>
+                    <p>The page you are looking for does not exist.</p>
+                  </div>
+                </AppLayout>
               }
             />
           </Routes>

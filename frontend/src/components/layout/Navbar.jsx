@@ -8,11 +8,20 @@ import "./Navbar.css";
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -27,25 +36,37 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className="nav-center">
-        <Link to="/forum" className="nav-item">
+      <div className="hamburger-menu" onClick={toggleMobileMenu}>
+        <div
+          className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}
+        ></div>
+        <div
+          className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}
+        ></div>
+        <div
+          className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}
+        ></div>
+      </div>
+
+      <div className={`nav-center ${mobileMenuOpen ? "mobile-open" : ""}`}>
+        <Link to="/forum" className="nav-item" onClick={closeMobileMenu}>
           Forums
         </Link>
-        <Link to="/matches" className="nav-item">
+        <Link to="/matches" className="nav-item" onClick={closeMobileMenu}>
           Matches
         </Link>
-        <Link to="/events" className="nav-item">
+        <Link to="/events" className="nav-item" onClick={closeMobileMenu}>
           Events
         </Link>
-        <Link to="/rankings" className="nav-item">
+        <Link to="/rankings" className="nav-item" onClick={closeMobileMenu}>
           Rankings
         </Link>
-        <Link to="/stats" className="nav-item">
+        <Link to="/stats" className="nav-item" onClick={closeMobileMenu}>
           Stats
         </Link>
       </div>
 
-      <div className="nav-right">
+      <div className={`nav-right ${mobileMenuOpen ? "mobile-open" : ""}`}>
         <div className="toggle-group">
           <span className="toggle-label">Night:</span>
           <button className="toggle-btn active">ON</button>

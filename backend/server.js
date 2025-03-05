@@ -18,9 +18,6 @@ const API_KEY = process.env.CRICKET_DATA_API_KEY;
 const CRICKET_DATA_BASE_URL = "https://api.cricapi.com/v1";
 const CACHE_TTL = 30; // Cache for 30 seconds to keep live data fresh
 
-// Enable trust proxy to properly handle X-Forwarded-For headers
-app.set("trust proxy", 1);
-
 // Initialize cache
 const cache = new NodeCache({
   stdTTL: CACHE_TTL,
@@ -267,9 +264,6 @@ app.get("/api/posts/:id", async (req, res) => {
       username: comment.user ? comment.user.username : comment.guestUsername,
     }));
 
-    // Ensure votes are included
-    transformedPost.votes = transformedPost.votes || 0;
-
     res.json(transformedPost);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -325,57 +319,6 @@ app.post("/api/posts/:postId/comments", async (req, res) => {
       populatedPost.comments[populatedPost.comments.length - 1];
 
     res.status(201).json(newComment);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Vote Routes
-app.post("/api/posts/:postId/vote", auth, async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const { direction } = req.body;
-    const userId = req.user.id;
-
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ error: "Post not found" });
-    }
-
-    // Check if user has already voted
-    const hasUpvoted = post.upvotes.includes(userId);
-    const hasDownvoted = post.downvotes.includes(userId);
-
-    // Handle vote based on direction
-    if (direction === "up") {
-      if (hasUpvoted) {
-        // Remove upvote if already upvoted
-        post.upvotes = post.upvotes.filter((id) => id.toString() !== userId);
-      } else {
-        // Add upvote and remove downvote if exists
-        post.upvotes.push(userId);
-        post.downvotes = post.downvotes.filter(
-          (id) => id.toString() !== userId
-        );
-      }
-    } else if (direction === "down") {
-      if (hasDownvoted) {
-        // Remove downvote if already downvoted
-        post.downvotes = post.downvotes.filter(
-          (id) => id.toString() !== userId
-        );
-      } else {
-        // Add downvote and remove upvote if exists
-        post.downvotes.push(userId);
-        post.upvotes = post.upvotes.filter((id) => id.toString() !== userId);
-      }
-    }
-
-    // Calculate total votes
-    post.votes = post.upvotes.length - post.downvotes.length;
-    await post.save();
-
-    res.json({ votes: post.votes });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

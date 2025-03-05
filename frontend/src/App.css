@@ -22,6 +22,7 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   width: 100%;
+  justify-content: center;
 }
 
 .app {
@@ -52,6 +53,7 @@ body {
   .main-container {
     padding: 0.75rem;
     gap: 0.75rem;
+    max-width: 100%;
   }
 
   .right-sidebar {
@@ -67,11 +69,18 @@ body {
   .sidebar,
   .right-sidebar {
     width: 100%;
+    max-width: 100%;
   }
 
   .right-sidebar {
     flex-direction: row;
     flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .right-sidebar > * {
+    flex: 1;
+    min-width: 250px;
   }
 }
 
@@ -83,6 +92,11 @@ body {
 
   .right-sidebar {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .right-sidebar > * {
+    width: 100%;
   }
 }
 
@@ -90,6 +104,11 @@ body {
   .main-container {
     padding: 0.25rem;
     gap: 0.25rem;
+  }
+
+  .sidebar,
+  .right-sidebar {
+    margin-bottom: 0.25rem;
   }
 }
 
@@ -110,4 +129,31 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--bg-tertiary);
+}
+
+/* Mobile-specific styles */
+@media (max-width: 480px) {
+  html,
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 0.9rem;
+  }
 }

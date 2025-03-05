@@ -43,11 +43,16 @@ const Post = ({ postId }) => {
     }
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/vote`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ direction }),
       });
@@ -131,19 +136,27 @@ const Post = ({ postId }) => {
 
       <div className="comments-section">
         <h3>Comments</h3>
-        {post.comments?.map((comment) => (
-          <div key={comment._id} className="comment">
-            <div className="comment-header">
-              <div className="comment-author">
-                {comment.user?.username || comment.guestUsername || "Anonymous"}
+        {post.comments && post.comments.length > 0 ? (
+          post.comments.map((comment) => (
+            <div key={comment._id} className="comment">
+              <div className="comment-header">
+                <div className="comment-author">
+                  {comment.user?.username ||
+                    comment.guestUsername ||
+                    "Anonymous"}
+                </div>
+                <span className="comment-date">
+                  {new Date(comment.createdAt).toLocaleString()}
+                </span>
               </div>
-              <span className="comment-date">
-                {new Date(comment.createdAt).toLocaleString()}
-              </span>
+              <div className="comment-content">{comment.text}</div>
             </div>
-            <div className="comment-content">{comment.text}</div>
+          ))
+        ) : (
+          <div className="no-comments">
+            No comments yet. Be the first to comment!
           </div>
-        ))}
+        )}
 
         <CommentForm
           postId={postId}
