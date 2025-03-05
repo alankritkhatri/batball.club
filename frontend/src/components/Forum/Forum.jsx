@@ -109,8 +109,8 @@ const Forum = () => {
                 <h2>{post.title}</h2>
               </Link>
               <div className="post-meta">
-                <span className="post-author">{post.author.username}</span>
-                <span className="post-date">{formatDate(post.createdAt)}</span>
+                <span className="post-author">{post?.author?.username}</span>
+                <span className="post-date">{formatDate(post?.createdAt)}</span>
               </div>
               <p className="post-content-preview">
                 {post.content.length > 200

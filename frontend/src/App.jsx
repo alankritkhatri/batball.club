@@ -7,6 +7,7 @@ import AppLayout from "./components/layout/AppLayout";
 import ForumPage from "./pages/ForumPage";
 import PostPage from "./pages/PostPage";
 import CreatePost from "./components/Forum/CreatePost";
+import ChampionsTrophyChat from "./pages/ChampionsTrophyChat";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -43,6 +44,9 @@ function App() {
                 </AppLayout>
               }
             />
+
+            {/* Champions Trophy Chat */}
+            <Route path="/champions-chat" element={<ChampionsTrophyChat />} />
 
             {/* Forum routes */}
             <Route path="/forum" element={<ForumPage />} />

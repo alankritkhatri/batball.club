@@ -18,8 +18,23 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && token) {
       try {
         const userData = JSON.parse(storedUser);
-        setUser(userData);
-        setIsAuthenticated(true);
+
+        // Normalize the user data to ensure _id exists
+        const normalizedUserData = {
+          ...userData,
+          _id: userData._id || userData.id, // Use _id if it exists, otherwise use id
+        };
+
+        if (!normalizedUserData._id) {
+          console.error("Stored user data is missing ID, logging out");
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        } else {
+          setUser(normalizedUserData);
+          setIsAuthenticated(true);
+          // Update localStorage with normalized data
+          localStorage.setItem("user", JSON.stringify(normalizedUserData));
+        }
       } catch (error) {
         console.error("Error parsing stored user data:", error);
         localStorage.removeItem("user");
@@ -30,9 +45,26 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    setUser(userData);
+    // Ensure userData has the required fields
+    // The server sends 'id' but we need '_id' for consistency
+    const normalizedUserData = {
+      ...userData,
+      _id: userData._id || userData.id, // Use _id if it exists, otherwise use id
+    };
+
+    if (!normalizedUserData._id) {
+      console.error(
+        "Login attempted with invalid user data (missing id):",
+        userData
+      );
+      return;
+    }
+
+    console.log("Logging in user:", normalizedUserData);
+    setUser(normalizedUserData);
     setIsAuthenticated(true);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(normalizedUserData));
+    localStorage.setItem("token", userData.token || "");
   };
 
   const logout = () => {

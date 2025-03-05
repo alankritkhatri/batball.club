@@ -9,10 +9,31 @@ const bcrypt = require("bcryptjs");
 const auth = require("./middleware/auth");
 const User = require("./models/User");
 const Post = require("./models/Post");
+const ChatMessage = require("./models/ChatMessage");
+const http = require("http");
+const { Server } = require("socket.io");
 require("dotenv").config();
 const asyncHandler = require("express-async-handler");
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  },
+  transports: ["websocket", "polling"],
+  path: "/socket.io/",
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  connectTimeout: 45000,
+  maxHttpBufferSize: 1e8, // 100 MB
+  serveClient: false,
+});
+
 const PORT = process.env.PORT || 5000;
 const API_KEY = process.env.CRICKET_DATA_API_KEY;
 const CRICKET_DATA_BASE_URL = "https://api.cricapi.com/v1";
@@ -115,6 +136,10 @@ mongoose
   })
   .then(() => {
     console.log("Connected to MongoDB - Database: batball");
+    // Start the server after successful MongoDB connection
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   })
   .catch((error) => {
     console.error("MongoDB connection error:", error);
@@ -742,6 +767,185 @@ app.get("/api/health", (req, res) => {
 // Apply error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Socket.io connection handling
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
+
+  // Handle joining a chat room
+  socket.on("join_room", async (data) => {
+    try {
+      const { userId, username, room, isGuest } = data;
+      console.log(
+        `User ${username} (${userId || "unknown ID"}) joining room: ${room}${
+          isGuest ? " as guest" : ""
+        }`
+      );
+
+      // Validate user data
+      if (!userId) {
+        console.warn(`User ${username} attempted to join without userId`);
+      }
+
+      // Join the specified room
+      socket.join(room);
+
+      // Create a join message - only for authenticated users to reduce spam
+      // Skip join messages for guests to reduce UI clutter
+      if (userId && !isGuest) {
+        const joinMessage = new ChatMessage({
+          user: userId,
+          username: username || "Anonymous",
+          message: `${username || "Anonymous"} has joined the chat`,
+          eventType: "join",
+          chatRoom: room,
+        });
+
+        try {
+          await joinMessage.save();
+          console.log("Join message saved to database:", joinMessage._id);
+        } catch (saveError) {
+          console.error("Error saving join message:", saveError);
+        }
+
+        // Broadcast the join message to all users in the room
+        io.to(room).emit("receive_message", {
+          _id: joinMessage._id,
+          username: joinMessage.username,
+          message: joinMessage.message,
+          eventType: joinMessage.eventType,
+          createdAt: joinMessage.createdAt,
+        });
+      }
+
+      // Send the last 50 messages to the user who just joined
+      try {
+        const chatHistory = await ChatMessage.find({ chatRoom: room })
+          .sort({ createdAt: -1 })
+          .limit(50)
+          .lean();
+
+        console.log(
+          `Sending ${chatHistory.length} messages from history to user ${username}`
+        );
+        socket.emit("chat_history", chatHistory.reverse());
+      } catch (historyError) {
+        console.error("Error fetching chat history:", historyError);
+        socket.emit("error", { message: "Failed to load chat history" });
+      }
+    } catch (error) {
+      console.error("Error in join_room:", error);
+      socket.emit("error", { message: "Failed to join chat room" });
+    }
+  });
+
+  // Handle sending a message
+  socket.on("send_message", async (data) => {
+    try {
+      const { userId, username, message, room, isGuest } = data;
+      console.log(
+        `Message from ${username} (ID: ${userId || "unknown"}) in room ${room}${
+          isGuest ? " as guest" : ""
+        }: ${message}`
+      );
+
+      // Enhanced validation with specific error messages
+      if (!userId && !isGuest) {
+        console.error("Missing userId in message data:", data);
+        return socket.emit("error", {
+          message:
+            "Invalid message data: userId is required for non-guest users",
+        });
+      }
+
+      if (!message) {
+        console.error("Missing message content in message data:", data);
+        return socket.emit("error", {
+          message: "Invalid message data: message content is required",
+        });
+      }
+
+      if (!room) {
+        console.error("Missing room in message data:", data);
+        return socket.emit("error", {
+          message: "Invalid message data: room is required",
+        });
+      }
+
+      if (isGuest && !username) {
+        console.error("Missing username for guest message:", data);
+        return socket.emit("error", {
+          message: "Invalid message data: username is required for guest users",
+        });
+      }
+
+      // Create and save the message
+      const newMessage = new ChatMessage({
+        user: isGuest ? userId : userId, // Store the guest ID as provided
+        username: username || "Anonymous",
+        message,
+        chatRoom: room,
+        eventType: "message",
+        isGuest: isGuest || false,
+      });
+
+      try {
+        await newMessage.save();
+        console.log(
+          "Message saved to database:",
+          newMessage._id,
+          isGuest ? "(Guest message)" : ""
+        );
+
+        // Log more details for debugging guest messages
+        if (isGuest) {
+          console.log("Guest message details:", {
+            id: newMessage._id,
+            user: newMessage.user,
+            username: newMessage.username,
+            isGuest: newMessage.isGuest,
+            timestamp: newMessage.createdAt,
+          });
+        }
+      } catch (saveError) {
+        console.error("Error saving message:", saveError, newMessage);
+        return socket.emit("error", {
+          message: "Failed to save message to database",
+        });
+      }
+
+      // Broadcast the message to all users in the room
+      io.to(room).emit("receive_message", {
+        _id: newMessage._id,
+        username: newMessage.username,
+        message: newMessage.message,
+        eventType: newMessage.eventType,
+        createdAt: newMessage.createdAt,
+      });
+    } catch (error) {
+      console.error("Error in send_message:", error);
+      socket.emit("error", { message: "Failed to send message" });
+    }
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
 });
+
+// REST API endpoints for chat
+app.get(
+  "/api/chat/:room",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { room } = req.params;
+    const limit = parseInt(req.query.limit) || 50;
+
+    const messages = await ChatMessage.find({ chatRoom: room })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    res.json(messages.reverse());
+  })
+);

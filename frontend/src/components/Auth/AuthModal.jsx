@@ -3,9 +3,18 @@ import Login from "./Login";
 import Register from "./Register";
 import "./Auth.css";
 
-const AuthModal = ({ onClose, onSuccess, message }) => {
-  const [isLogin, setIsLogin] = useState(true);
+const AuthModal = ({ onClose, onSuccess, message, initialMode }) => {
+  const [isLogin, setIsLogin] = useState(initialMode !== "register");
   const modalRef = useRef(null);
+
+  // Set initial mode based on prop
+  useEffect(() => {
+    if (initialMode === "register") {
+      setIsLogin(false);
+    } else {
+      setIsLogin(true);
+    }
+  }, [initialMode]);
 
   const handleSuccess = () => {
     if (onSuccess) {
