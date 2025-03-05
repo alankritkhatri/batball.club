@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
+import { useAuth } from "../../context/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const Sidebar = () => {
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { user, openLoginModal } = useAuth();
 
   useEffect(() => {
     fetchRecentPosts();
@@ -27,8 +30,24 @@ const Sidebar = () => {
     }
   };
 
+  const handleCreatePost = () => {
+    if (!user) {
+      openLoginModal("Please log in or register to create a new post");
+    } else {
+      navigate("/create-post");
+    }
+  };
+
   return (
     <div className="sidebar">
+      <div className="sidebar-section create-post-sidebar-section">
+        <button
+          className="create-post-sidebar-button"
+          onClick={handleCreatePost}
+        >
+          Create New Post
+        </button>
+      </div>
       <div className="sidebar-section">
         <h3 className="section-title">RECENT DISCUSSION</h3>
         <ul className="thread-list">

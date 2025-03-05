@@ -1,14 +1,10 @@
 import { useState, useEffect } from "react";
 import "./MainContent.css";
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const MainContent = () => {
-  const navigate = useNavigate();
-  const { user, openLoginModal } = useAuth();
   const [newsItems, setNewsItems] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -82,27 +78,18 @@ const MainContent = () => {
 
   const groupedNews = groupNewsByDate();
 
-  const handleCreatePost = () => {
-    if (!user) {
-      openLoginModal("Please log in or register to create a new post");
-    } else {
-      navigate("/create-post");
-    }
-  };
-
   return (
     <div className="main-content">
-      <div className="create-post-section">
-        <button className="create-post-button" onClick={handleCreatePost}>
-          Create New Post
-        </button>
+      <div className="news-header">
+        <h1 style={{ margin: "16px 0px " }}>Cricket News</h1>
       </div>
+
       {error && <div className="error-message">Error: {error}</div>}
 
       {Object.entries(groupedNews).map(([date, news], index) => (
         <div key={index} className="news-day">
           <div className="date-header">
-            <span className="date">{date}</span>
+            <span className="date">Date: {date}</span>
             {date === new Date().toLocaleDateString() && (
               <span className="today-tag">TODAY</span>
             )}
