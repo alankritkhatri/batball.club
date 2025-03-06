@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Login from "./Login";
 import Register from "./Register";
 import "./Auth.css";
@@ -60,7 +61,7 @@ const AuthModal = ({ onClose, onSuccess, message, initialMode }) => {
     }
   };
 
-  return (
+  const modalContent = (
     <div
       className="auth-modal"
       onClick={handleBackdropClick}
@@ -114,6 +115,9 @@ const AuthModal = ({ onClose, onSuccess, message, initialMode }) => {
       </div>
     </div>
   );
+
+  // Use createPortal to render the modal at the end of the document body
+  return createPortal(modalContent, document.body);
 };
 
 export default AuthModal;
