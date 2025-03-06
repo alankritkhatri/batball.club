@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import AuthModal from "../Auth/AuthModal";
@@ -8,8 +8,8 @@ import AppLayout from "../layout/AppLayout";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // Modular CreatePost component without white background
-const CreatePost = ({ inline = false, onCancel }) => {
-  const { user } = useAuth();
+const CreatePost = ({ inline = false, onCancel, onPostCreated }) => {
+  const { user, guestName, openGuestModal } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
@@ -18,16 +18,16 @@ const CreatePost = ({ inline = false, onCancel }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMessage, setAuthMessage] = useState(
-    "Please log in or register to create a new post."
+  const [authMessage] = useState(
+    "Please log in, register, or continue as a guest to create a new post."
   );
 
   useEffect(() => {
-    // Check if user is logged in when component mounts
-    if (!user) {
+    // Check if user is logged in or has a guest name when component mounts
+    if (!user && !guestName) {
       setShowAuthModal(true);
     }
-  }, [user]);
+  }, [user, guestName]);
 
   const handleChange = (e) => {
     setFormData({
@@ -38,192 +38,163 @@ const CreatePost = ({ inline = false, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) {
-      setError("Please log in to create a post");
-      setAuthMessage("You need to be logged in to create a post.");
-      setShowAuthModal(true);
+
+    // If not logged in and no guest name, prompt for guest name
+    if (!user && !guestName) {
+      openGuestModal(guestSubmitCallback);
       return;
     }
 
+    await submitPost();
+  };
+
+  const submitPost = async () => {
     if (!formData.title.trim() || !formData.content.trim()) {
       setError("Please fill in all fields");
       return;
     }
 
+    setLoading(true);
+    setError("");
+
     try {
-      setLoading(true);
-      setError("");
+      const headers = {
+        "Content-Type": "application/json",
+      };
 
-      // Get token from localStorage
-      const token = localStorage.getItem("token");
-
-      // Log token for debugging
-      console.log("Using token for post creation:", token);
-
-      if (!token) {
-        throw new Error(
-          "Authentication token is missing. Please log in again."
-        );
+      // Add authorization header if user is logged in
+      if (user) {
+        headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
       }
 
       const response = await fetch(`${API_BASE_URL}/api/posts`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
         body: JSON.stringify({
-          title: formData.title.trim(),
-          content: formData.content.trim(),
+          ...formData,
+          // Include guest name if not logged in
+          ...(user ? {} : { guestUsername: guestName }),
         }),
       });
 
-      // Log response status for debugging
-      console.log("Post creation response status:", response.status);
-
-      const data = await response.json();
-
-      // Log response data for debugging
-      console.log("Post creation response data:", data);
-
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create post");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create post");
       }
 
+      const newPost = await response.json();
+      console.log("Post created:", newPost);
+
+      // Clear form
+      setFormData({
+        title: "",
+        content: "",
+      });
+
+      // If inline, call onCancel to close the form
       if (inline) {
-        if (onCancel) onCancel();
+        if (onPostCreated) {
+          onPostCreated(newPost);
+        } else if (onCancel) {
+          onCancel();
+        }
       } else {
-        navigate(`/post/${data._id}`);
+        // Navigate to the new post
+        navigate(`/posts/${newPost._id}`);
       }
     } catch (err) {
       console.error("Error creating post:", err);
-      setError(err.message);
+      setError(err.message || "Failed to create post");
     } finally {
       setLoading(false);
     }
   };
+
+  // Define the callback function after submitPost is defined
+  const guestSubmitCallback = useCallback(() => {
+    submitPost();
+  }, [submitPost]);
 
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
   };
 
   const handleAuthClose = () => {
-    if (inline) {
-      if (onCancel) onCancel();
-    } else {
-      navigate("/forum");
+    setShowAuthModal(false);
+    if (inline && onCancel) {
+      onCancel();
     }
   };
 
-  // Show auth modal for logged out users
-  if (!user && showAuthModal) {
-    return (
-      <AuthModal
-        onClose={handleAuthClose}
-        onSuccess={handleAuthSuccess}
-        message={authMessage}
-      />
-    );
-  }
+  // Determine if we should show the guest option
+  const showGuestOption = !user && !guestName;
 
-  const formContent = (
-    <>
-      {error && <div className="error-message">{error}</div>}
-      <form onSubmit={handleSubmit} className="post-form">
+  return (
+    <div className={`create-post-container ${inline ? "inline" : ""}`}>
+      <form onSubmit={handleSubmit} className="create-post-form">
+        <h2>{inline ? "Create New Post" : "Create a New Post"}</h2>
         <div className="form-group">
-          <label htmlFor="title">Title</label>
           <input
             type="text"
-            id="title"
             name="title"
             value={formData.title}
             onChange={handleChange}
-            required
-            placeholder="Enter a descriptive title"
+            placeholder="Title"
             className="post-input"
-            disabled={loading}
-            maxLength={200}
+            required
           />
-          <small className="char-count">{formData.title.length}/200</small>
         </div>
         <div className="form-group">
-          <label htmlFor="content">Content</label>
           <textarea
-            id="content"
             name="content"
             value={formData.content}
             onChange={handleChange}
-            required
             placeholder="Write your post content here..."
             className="post-textarea"
-            rows="12"
-            disabled={loading}
-            maxLength={10000}
+            required
           />
-          <small className="char-count">{formData.content.length}/10000</small>
         </div>
+        {error && <div className="error-message">{error}</div>}
         <div className="form-actions">
-          {inline ? (
-            <button type="button" className="cancel-button" onClick={onCancel}>
+          {inline && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="cancel-button"
+              disabled={loading}
+            >
               Cancel
             </button>
-          ) : (
-            <Link to="/forum" className="cancel-button">
-              Cancel
-            </Link>
           )}
           <button type="submit" className="submit-button" disabled={loading}>
-            {loading ? (
-              <span className="loading-spinner">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="spinner"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-                Creating...
-              </span>
-            ) : (
-              "Create Post"
-            )}
+            {loading ? "Creating..." : "Create Post"}
           </button>
         </div>
+        {!user && guestName && (
+          <div className="guest-info">
+            Posting as guest: <strong>{guestName}</strong>
+          </div>
+        )}
+        {showGuestOption && (
+          <div className="guest-option">
+            <button
+              type="button"
+              onClick={() => openGuestModal()}
+              className="guest-button"
+            >
+              Continue as Guest
+            </button>
+          </div>
+        )}
       </form>
-    </>
-  );
-
-  // If this is an inline component (used within another page), don't wrap with AppLayout
-  if (inline) {
-    return (
-      <div className="create-post-container">
-        <h2>Create New Post</h2>
-        {formContent}
-      </div>
-    );
-  }
-
-  // For standalone page, wrap with AppLayout
-  return (
-    <AppLayout>
-      <div className="create-post-container">
-        <div className="post-navigation">
-          <Link to="/forum" className="back-to-forum">
-            ← Back to Forum
-          </Link>
-        </div>
-        <h2>Create New Post</h2>
-        {formContent}
-      </div>
-    </AppLayout>
+      {showAuthModal && (
+        <AuthModal
+          onClose={handleAuthClose}
+          onSuccess={handleAuthSuccess}
+          message={authMessage}
+        />
+      )}
+    </div>
   );
 };
 

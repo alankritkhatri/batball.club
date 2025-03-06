@@ -250,14 +250,46 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // Post Routes
-app.post("/api/posts", auth, async (req, res) => {
+app.post("/api/posts", async (req, res) => {
   try {
-    const { title, content } = req.body;
-    const post = new Post({
-      title,
-      content,
-      author: req.user._id,
-    });
+    const { title, content, guestUsername } = req.body;
+    const authHeader = req.header("Authorization");
+
+    let postData = { title, content };
+
+    // If user is authenticated, use their ID
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        if (user) {
+          postData.author = user._id;
+        }
+      } catch (error) {
+        console.log("Invalid token, treating as guest post");
+      }
+    }
+
+    // If no author ID, use guest username
+    if (!postData.author) {
+      if (!guestUsername) {
+        return res.status(400).json({ error: "Guest username is required" });
+      }
+
+      // Create a temporary guest user
+      const guestUser = new User({
+        username: `guest_${guestUsername}`,
+        email: `guest_${Date.now()}@example.com`,
+        password: `guest_${Date.now()}`,
+        isGuest: true,
+      });
+
+      await guestUser.save();
+      postData.author = guestUser._id;
+    }
+
+    const post = new Post(postData);
     await post.save();
     res.status(201).json(post);
   } catch (error) {

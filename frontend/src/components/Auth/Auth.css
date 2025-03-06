@@ -89,13 +89,39 @@
 }
 
 .error-message {
-  background-color: rgba(255, 70, 85, 0.1);
-  color: #ff4655;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.25rem;
-  font-size: 0.875rem;
-  border-left: 4px solid #ff4655;
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+  border-left: 3px solid #e74c3c;
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  animation: errorShake 0.5s ease-in-out;
+}
+
+@keyframes errorShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.form-group input.error {
+  border-color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.05);
+  box-shadow: 0 0 0 1px rgba(231, 76, 60, 0.2);
+}
+
+.form-group input.error:focus {
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.3);
 }
 
 .password-requirements {
@@ -313,19 +339,49 @@
   }
 }
 
-.form-group input.error {
-  border-color: #ff4655;
-  background-color: rgba(255, 70, 85, 0.05);
-}
-
-.form-group input.error:focus {
-  box-shadow: 0 0 0 3px rgba(255, 70, 85, 0.1);
-}
-
 .field-error {
   color: #ff4655;
   font-size: 0.875rem;
   margin-top: 0.5rem;
   padding-left: 0.5rem;
   border-left: 2px solid #ff4655;
+}
+
+/* Guest option styles */
+.guest-option-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: #777;
+}
+
+.guest-option-divider::before,
+.guest-option-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.guest-option-divider span {
+  padding: 0 10px;
+  font-size: 0.9rem;
+}
+
+.guest-continue-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #f8f9fa;
+  color: #555;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 10px;
+}
+
+.guest-continue-btn:hover {
+  background-color: #e9ecef;
+  border-color: #ccc;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import AuthModal from "../Auth/AuthModal";
 import CreatePost from "./CreatePost";
@@ -14,10 +14,34 @@ const Forum = () => {
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+
+    // Check URL query parameters for showCreatePost
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get("showCreatePost") === "true" && user) {
+      setShowCreatePost(true);
+    }
+
+    // Listen for the custom event to show the create post form
+    const handleShowCreatePostForm = () => {
+      setShowCreatePost(true);
+      // Scroll to the top of the page to show the form
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.addEventListener("showCreatePostForm", handleShowCreatePostForm);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener(
+        "showCreatePostForm",
+        handleShowCreatePostForm
+      );
+    };
+  }, [location.search, user]);
 
   const fetchPosts = async () => {
     try {
@@ -62,6 +86,17 @@ const Forum = () => {
 
   const handleCancelCreate = () => {
     setShowCreatePost(false);
+    // Remove the query parameter from the URL
+    if (location.search.includes("showCreatePost=true")) {
+      const url = new URL(window.location);
+      url.searchParams.delete("showCreatePost");
+      window.history.replaceState({}, "", url);
+    }
+  };
+
+  const handlePostCreated = () => {
+    setShowCreatePost(false);
+    fetchPosts(); // Refresh the posts list
   };
 
   if (loading) {
@@ -94,7 +129,11 @@ const Forum = () => {
       </div>
 
       {showCreatePost && (
-        <CreatePost inline={true} onCancel={handleCancelCreate} />
+        <CreatePost
+          inline={true}
+          onCancel={handleCancelCreate}
+          onPostCreated={handlePostCreated}
+        />
       )}
 
       {posts.length === 0 && !showCreatePost ? (
@@ -109,7 +148,12 @@ const Forum = () => {
                 <h2>{post.title}</h2>
               </Link>
               <div className="post-meta">
-                <span className="post-author">{post?.author?.username}</span>
+                <span className="post-author">
+                  {post?.author?.username ||
+                    (post?.guestUsername
+                      ? `Guest: ${post.guestUsername}`
+                      : "Anonymous")}
+                </span>
                 <span className="post-date">{formatDate(post?.createdAt)}</span>
               </div>
               <p className="post-content-preview">

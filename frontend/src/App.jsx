@@ -1,12 +1,16 @@
 import "./App.css";
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import MainContent from "./components/layout/MainContent";
 import AppLayout from "./components/layout/AppLayout";
 import ForumPage from "./pages/ForumPage";
 import PostPage from "./pages/PostPage";
-import CreatePost from "./components/Forum/CreatePost";
 import ChampionsTrophyChat from "./pages/ChampionsTrophyChat";
 import LogsPage from "./pages/LogsPage";
 import { AuthProvider } from "./context/AuthContext";
@@ -52,11 +56,19 @@ function App() {
 
             {/* Forum routes */}
             <Route path="/forum" element={<ForumPage />} />
-            <Route path="/forum/create-post" element={<CreatePost />} />
             <Route path="/forum/post/:postId" element={<PostPage />} />
             {/* Additional routes for direct post access */}
             <Route path="/post/:postId" element={<PostPage />} />
-            <Route path="/create-post" element={<CreatePost />} />
+
+            {/* Redirect create-post to forum with query parameter */}
+            <Route
+              path="/create-post"
+              element={<Navigate to="/forum?showCreatePost=true" replace />}
+            />
+            <Route
+              path="/forum/create-post"
+              element={<Navigate to="/forum?showCreatePost=true" replace />}
+            />
 
             {/* Logs route */}
             <Route path="/logs" element={<LogsPage />} />

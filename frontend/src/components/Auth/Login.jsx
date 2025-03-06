@@ -27,31 +27,18 @@ const Login = ({ onSuccess }) => {
     setIsLoading(true);
 
     try {
-      // Log the login attempt for debugging
-      console.log("Attempting login with:", formData.email);
-
+      // Attempt login
       const response = await auth.login(formData.email, formData.password);
 
-      // Log the response for debugging
-      console.log("Login response:", response);
-
+      // Validate response
       const { token, user } = response;
 
-      if (!token) {
-        console.error("No token received from server");
-        throw new Error("No authentication token received from server");
-      }
-
-      if (!user) {
-        console.error("No user data received from server");
-        throw new Error("No user data received from server");
+      if (!token || !user) {
+        throw new Error("Invalid response from server");
       }
 
       // Store token in localStorage
       localStorage.setItem("token", token);
-
-      // Log token storage for debugging
-      console.log("Token stored in localStorage:", token);
 
       // Create a complete user object with token
       const userWithToken = {
@@ -62,16 +49,34 @@ const Login = ({ onSuccess }) => {
       // Pass the complete user object to authLogin
       authLogin(userWithToken);
 
+      // Only call onSuccess if login was successful
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError(
-        error.response?.data?.error ||
-          error.message ||
-          "An error occurred during login"
-      );
+
+      // Set appropriate error message
+      if (
+        error.message.includes("401") ||
+        error.message.includes("credentials")
+      ) {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError(
+          error.response?.data?.error ||
+            error.message ||
+            "An error occurred. Please try again."
+        );
+      }
+
+      // Highlight the password field on error
+      const passwordInput = document.getElementById("password");
+      if (passwordInput) {
+        passwordInput.focus();
+      }
+
+      // Do NOT call onSuccess - this keeps the modal open
     } finally {
       setIsLoading(false);
     }
@@ -92,6 +97,7 @@ const Login = ({ onSuccess }) => {
             onChange={handleChange}
             required
             disabled={isLoading}
+            className={error ? "error" : ""}
           />
         </div>
         <div className="form-group">

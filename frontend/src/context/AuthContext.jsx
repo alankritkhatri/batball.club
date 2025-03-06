@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import AuthModal from "../components/Auth/AuthModal";
+import GuestNameModal from "../components/Auth/GuestNameModal";
 
 export const AuthContext = createContext();
 
@@ -9,11 +10,19 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginModalMessage, setLoginModalMessage] = useState("");
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestCallback, setGuestCallback] = useState(null);
 
   // Initialize auth state from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
+    const storedGuestName = localStorage.getItem("guestName");
+
+    if (storedGuestName) {
+      setGuestName(storedGuestName);
+    }
 
     if (storedUser && token) {
       try {
@@ -106,6 +115,28 @@ export const AuthProvider = ({ children }) => {
     setShowLoginModal(false);
   };
 
+  // New functions for guest functionality
+  const openGuestModal = (callback = null) => {
+    setGuestCallback(callback);
+    setShowGuestModal(true);
+  };
+
+  const closeGuestModal = () => {
+    setShowGuestModal(false);
+    setGuestCallback(null);
+  };
+
+  const handleGuestSubmit = (name) => {
+    setGuestName(name);
+    localStorage.setItem("guestName", name);
+
+    // If there's a callback function, call it with the guest name
+    if (guestCallback && typeof guestCallback === "function") {
+      guestCallback(name);
+      setGuestCallback(null);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -120,6 +151,9 @@ export const AuthProvider = ({ children }) => {
         isLoading,
         openLoginModal,
         closeLoginModal,
+        guestName,
+        openGuestModal,
+        closeGuestModal,
       }}
     >
       {children}
@@ -128,6 +162,12 @@ export const AuthProvider = ({ children }) => {
           onClose={closeLoginModal}
           onSuccess={handleLoginSuccess}
           message={loginModalMessage}
+        />
+      )}
+      {showGuestModal && (
+        <GuestNameModal
+          onClose={closeGuestModal}
+          onSubmit={handleGuestSubmit}
         />
       )}
     </AuthContext.Provider>

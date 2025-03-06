@@ -23,8 +23,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear auth data on unauthorized
+    // Don't automatically reload on 401 errors - let components handle them
+    // This allows the login modal to stay open with error messages
+    if (
+      error.response?.status === 401 &&
+      !error.config.url.includes("/api/auth/login")
+    ) {
+      // Only clear auth data and reload for non-login 401 errors
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.reload();

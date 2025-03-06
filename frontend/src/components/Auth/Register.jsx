@@ -83,7 +83,7 @@ const Register = ({ onSuccess }) => {
 
     // Validate form
     if (!validateForm()) {
-      return;
+      return; // Don't proceed if validation fails - modal stays open
     }
 
     setIsLoading(true);
@@ -101,6 +101,8 @@ const Register = ({ onSuccess }) => {
 
       localStorage.setItem("token", token);
       authLogin(user);
+
+      // Only call onSuccess if registration was successful
       if (onSuccess) {
         onSuccess();
       }
@@ -110,14 +112,37 @@ const Register = ({ onSuccess }) => {
       // Handle structured error response
       if (error.response?.data?.details) {
         setErrors(error.response.data.details);
+      } else if (
+        error.message.includes("duplicate") ||
+        error.message.includes("already exists")
+      ) {
+        // Handle duplicate username/email errors
+        if (error.message.toLowerCase().includes("username")) {
+          setErrors({
+            username:
+              "This username is already taken. Please choose another one.",
+          });
+        } else if (error.message.toLowerCase().includes("email")) {
+          setErrors({
+            email:
+              "This email is already registered. Please use another email or login.",
+          });
+        } else {
+          setErrors({
+            general:
+              "This account already exists. Please try logging in instead.",
+          });
+        }
       } else {
         setErrors({
           general:
             error.response?.data?.error ||
             error.message ||
-            "An error occurred during registration",
+            "An error occurred during registration. Please try again.",
         });
       }
+
+      // Do NOT call onSuccess - this keeps the modal open
     } finally {
       setIsLoading(false);
     }

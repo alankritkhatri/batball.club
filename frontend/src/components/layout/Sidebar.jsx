@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 import { useAuth } from "../../context/AuthContext";
-
+import { Analytics } from "@vercel/analytics/react";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// Create a context for forum state management
+export const ForumContext = React.createContext();
 
 const Sidebar = () => {
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const location = useLocation();
   const { user, openLoginModal } = useAuth();
+  const isForumPage =
+    location.pathname === "/forum" || location.pathname === "/";
 
   useEffect(() => {
     fetchRecentPosts();
@@ -33,23 +38,32 @@ const Sidebar = () => {
   const handleCreatePost = () => {
     if (!user) {
       openLoginModal("Please log in or register to create a new post");
+      return;
+    }
+
+    // If we're on the forum page, dispatch a custom event to show the create post form
+    if (isForumPage) {
+      const event = new CustomEvent("showCreatePostForm");
+      window.dispatchEvent(event);
     } else {
-      navigate("/create-post");
+      // If we're not on the forum page, navigate to the forum page with a query parameter
+      window.location.href = "/forum?showCreatePost=true";
     }
   };
 
   return (
     <div className="sidebar">
       <div className="sidebar-section create-post-sidebar-section">
-        <button
-          className="create-post-sidebar-button"
-          onClick={handleCreatePost}
-        >
-          Create New Post
+        <button className="create-post-sidebar-button">
+          <a style={{ textDecoration: "none", color: "white" }} href="/forum">
+            Create New Post
+          </a>
         </button>
       </div>
-      <div className="sidebar-section">
-        <h3 className="section-title">RECENT DISCUSSION</h3>
+      <div style={{ margin: "8px" }} className="sidebar-section">
+        <h3 style={{ fontSize: "14px" }} className="section-title">
+          RECENT DISCUSSION IN FORUMs
+        </h3>
         <ul className="thread-list">
           {loading ? (
             <li className="thread-item loading">Loading...</li>

@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  isGuest: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

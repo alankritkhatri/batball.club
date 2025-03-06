@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import Login from "./Login";
 import Register from "./Register";
+import { useAuth } from "../../context/AuthContext";
 import "./Auth.css";
 
 const AuthModal = ({ onClose, onSuccess, message, initialMode }) => {
   const [isLogin, setIsLogin] = useState(initialMode !== "register");
+  const { openGuestModal } = useAuth();
   const modalRef = useRef(null);
 
   // Set initial mode based on prop
@@ -22,6 +24,16 @@ const AuthModal = ({ onClose, onSuccess, message, initialMode }) => {
       onSuccess();
     }
     onClose();
+  };
+
+  const handleGuestOption = () => {
+    onClose();
+    // Only pass onSuccess if it's a function
+    if (typeof onSuccess === "function") {
+      openGuestModal(onSuccess);
+    } else {
+      openGuestModal();
+    }
   };
 
   const handleKeyDown = useCallback(
@@ -112,6 +124,12 @@ const AuthModal = ({ onClose, onSuccess, message, initialMode }) => {
             <Register onSuccess={handleSuccess} />
           )}
         </div>
+        <div className="guest-option-divider">
+          <span>OR</span>
+        </div>
+        <button className="guest-continue-btn" onClick={handleGuestOption}>
+          Continue as Guest
+        </button>
       </div>
     </div>
   );
